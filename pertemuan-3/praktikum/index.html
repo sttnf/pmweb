@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Black Goose Bistro | Pizza-on-Demand</title>
+  </head>
+
+  <body
+    style="
+      font-family: Arial, Helvetica, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    "
+  >
+    <h1 style="text-align: center">Black Goose Bistro | Pizza-on-Demand</h1>
+
+    <p style="text-align: center">
+      Our 12" wood-fired pizzas are available for delivery. Build your custom
+      pizza and we'll deliver it within an hour.
+    </p>
+
+    <form action="./order.html">
+      <div style="margin-bottom: 20px">
+        <h2>Your Information</h2>
+
+        <div style="margin-bottom: 15px">
+          <label for="name" style="display: block; font-weight: bold"
+            >Name:</label
+          >
+          <input required id="name" style="width: 100%; padding: 8px" />
+        </div>
+
+        <div style="margin-bottom: 15px">
+          <label for="address" style="display: block; font-weight: bold"
+            >Address:</label
+          >
+          <input required id="address" style="width: 100%; padding: 8px" />
+        </div>
+
+        <div style="margin-bottom: 15px">
+          <label for="phone" style="display: block; font-weight: bold"
+            >Telephone Number:</label
+          >
+          <input
+            required
+            type="tel"
+            id="phone"
+            style="width: 100%; padding: 8px"
+          />
+        </div>
+
+        <div style="margin-bottom: 15px">
+          <label for="email" style="display: block; font-weight: bold"
+            >Email:</label
+          >
+          <input
+            required
+            type="email"
+            id="email"
+            style="width: 100%; padding: 8px"
+          />
+        </div>
+
+        <div style="margin-bottom: 20px">
+          <label for="instructions" style="display: block; font-weight: bold"
+            >Delivery Instructions:</label
+          >
+          <textarea
+            id="instructions"
+            maxlength="400"
+            placeholder="No more than 400 characters"
+            style="width: 100%; padding: 8px"
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px">
+        <h2>Design Your Pizza</h2>
+
+        <div style="margin-bottom: 15px">
+          <label style="font-weight: bold">Crust (choose one):</label>
+
+          <div style="margin-left: 20px">
+            <div>
+              <input required type="radio" name="crust" value="classic-white" />
+              Classic white
+            </div>
+            <div>
+              <input required type="radio" name="crust" value="multigrain" />
+              Multigrain
+            </div>
+            <div>
+              <input
+                required
+                type="radio"
+                name="crust"
+                value="cheese-stuffed-crust"
+              />
+              Cheese-stuffed crust
+            </div>
+            <div>
+              <input required type="radio" name="crust" value="gluten-free" />
+              Gluten-free
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px">
+          <label style="font-weight: bold"
+            >Toppings (Choose as many as you want):</label
+          >
+
+          <div style="margin-left: 20px">
+            <div>
+              <input
+                required
+                type="checkbox"
+                name="toppings[]"
+                value="red-sauce"
+                checked
+              />
+              Red sauce
+            </div>
+            <div>
+              <input
+                required
+                type="checkbox"
+                name="toppings[]"
+                value="white-sauce"
+              />
+              White sauce
+            </div>
+            <div>
+              <input
+                required
+                type="checkbox"
+                name="toppings[]"
+                value="mozzarella-cheese"
+              />
+              Mozzarella cheese
+            </div>
+            <div>
+              <input
+                required
+                type="checkbox"
+                name="toppings[]"
+                value="pepperoni"
+              />
+              Pepperoni
+            </div>
+            <div>
+              <input
+                required
+                type="checkbox"
+                name="toppings[]"
+                value="mushrooms"
+              />
+              Mushrooms
+            </div>
+            <div>
+              <input
+                required
+                type="checkbox"
+                name="toppings[]"
+                value="peppers"
+              />
+              Peppers
+            </div>
+            <div>
+              <input
+                required
+                type="checkbox"
+                name="toppings[]"
+                value="anchovies"
+              />
+              Anchovies
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px">
+          <label for="quantity" style="display: block; font-weight: bold"
+            >How many pizzas:</label
+          >
+          <input
+            required
+            type="number"
+            id="quantity"
+            max="6"
+            style="width: 100%; padding: 8px"
+          />
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            style="padding: 10px 20px; margin-right: 10px; cursor: pointer"
+          >
+            Bring me a pizza!
+          </button>
+          <button type="reset" style="padding: 10px 20px; cursor: pointer">
+            Reset
+          </button>
+        </div>
+      </div>
+    </form>
+  </body>
+</html>
