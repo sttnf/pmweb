@@ -1,0 +1,59 @@
+body {
+  background-color: lightblue;
+  font-family: "Lucia Sans", Verdana, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  color: blueviolet;
+}
+
+p {
+  text-align: justify;
+  width: fit-content;
+}
+
+img {
+  border: 2px solid navy;
+}
+
+.center {
+  width: 25%;
+  display: block;
+  margin: auto;
+}
+
+.foto {
+  background-color: black;
+}
+
+.foto img {
+  width: 23%;
+}
+
+.promo {
+  text-align: center;
+  color: red;
+}
+
+.cod p {
+  background-color: aqua;
+  border: 1px dotted red;
+  text-align: center;
+  font-width: bold;
+  color: blue;
+  width: fit-content;
+}
+
+.cod {
+  width: fit-content;
+}
+
+#tombol {
+  background-color: yellow;
+  color: red;
+  width: fit-content;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: bold;
+}
