@@ -1,0 +1,47 @@
+.hightlight {
+  font-weight: bold;
+}
+
+.italic {
+  font-style: italic;
+}
+
+ol {
+  background-color: #f1f1f1;
+}
+
+ol li {
+  padding: 10px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid #9cc2e5;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  color: white;
+  background-color: #5b9bd5;
+}
+
+tr:nth-child(even) {
+  background-color: #9cc2e5;
+}
+
+td.tnum {
+  font-weight: bold;
+}
