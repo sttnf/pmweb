@@ -1,112 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-</head>
-
-<body style="
+  <body
+    style="
       max-width: 600px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       margin: auto;
-    ">
-  <header style="width: 100%; margin-bottom: 24px">
-    <nav>
-      <ul style="
+    "
+  >
+    <header style="width: 100%; margin-bottom: 24px">
+      <nav>
+        <ul
+          style="
             display: flex;
             gap: 32px;
             list-style: none;
             padding: 12px;
             border: 1px solid #ccc;
             justify-content: center;
-          ">
-        <li>
-          <a href="#">Home</a>
-        </li>
-        <li>
-          <a href="#">Generate Link </a>
-        </li>
-        <li><a href="#">Transaction History</a></li>
-        <li><a href="#">Policy</a></li>
-        <li><a href="#">Logout</a></li>
-      </ul>
-    </nav>
-  </header>
+          "
+        >
+          <li>
+            <a href="#">Home</a>
+          </li>
+          <li>
+            <a href="#">Generate Link </a>
+          </li>
+          <li><a href="#">Transaction History</a></li>
+          <li><a href="#">Policy</a></li>
+          <li><a href="#">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
 
-  <div style="
+    <div
+      style="
         display: flex;
         justify-content: space-between;
         gap: 32px;
         width: 100%;
-      ">
-    <div style="
+      "
+    >
+      <div
+        style="
           display: flex;
           flex-direction: column;
           gap: 12px;
           align-items: center;
-        ">
-      <img src="https://placehold.co/300" alt="Placeholder" />
+        "
+      >
+        <img src="https://placehold.co/300" alt="Placeholder" />
+      </div>
+
+      <form
+        style="display: flex; flex-direction: column; gap: 16px; width: 100%"
+      >
+        <div>
+          <label for="title">Title Here: </label>
+          <span>MacBook Pro M3</span>
+        </div>
+        <div>
+          <label for="description">Description: </label>
+          <span>15" M3 Chip</span>
+        </div>
+        <div>
+          <label for="account-number">Total Amount: </label>
+          <span> Rp. 20.000.000 </span>
+        </div>
+        <div>
+          <label for="bank">Pay to: </label>
+          <span> BCA 1234567890 </span>
+        </div>
+        <div>
+          <label for="bank">Payment type: </label>
+          <span> Transfer </span>
+        </div>
+        <div>
+          <label for="bank">Account holder: </label>
+          <span> Ilham God </span>
+        </div>
+        <div>
+          <label for="bank">Send to phone: </label>
+          <span>628123456789</span>
+        </div>
+        <div>
+          <label for="bank">Send to email: </label>
+          <span>ilham@god.id</span>
+        </div>
+        <div>
+          <label for="bank">Account Holder: </label>
+          <span> Ilham God </span>
+        </div>
+
+        <div style="display: flex; gap: 12px">
+          <div>
+            <input
+              id="sent-to-phone"
+              name="sent-to-phone"
+              type="checkbox"
+              checked
+            />
+            <label for="sent-to-phone">Send to Mobile Phone</label>
+          </div>
+          <div>
+            <input
+              id="sent-to-email"
+              name="sent-to-email"
+              type="checkbox"
+              checked
+              readonly
+            />
+            <label for="sent-to-email">Send to Email</label>
+          </div>
+        </div>
+
+        <button type="submit" style="padding: 10px 16px; width: fit-content">
+          Pay using QuidLink
+        </button>
+      </form>
     </div>
-
-    <form style="display: flex; flex-direction: column; gap: 16px; width: 100%">
-      <div>
-        <label for="title">Title Here: </label>
-        <span>MacBook Pro M3</span>
-      </div>
-      <div>
-        <label for="description">Description: </label>
-        <span>15" M3 Chip</span>
-      </div>
-      <div>
-        <label for="account-number">Total Amount: </label>
-        <span> Rp. 20.000.000 </span>
-      </div>
-      <div>
-        <label for="bank">Pay to: </label>
-        <span> BCA 1234567890 </span>
-      </div>
-      <div>
-        <label for="bank">Payment type: </label>
-        <span> Transfer </span>
-      </div>
-      <div>
-        <label for="bank">Account holder: </label>
-        <span> Ilham God </span>
-      </div>
-      <div>
-        <label for="bank">Send to phone: </label>
-        <span>628123456789</span>
-      </div>
-      <div>
-        <label for="bank">Send to email: </label>
-        <span>ilham@god.id</span>
-      </div>
-      <div>
-        <label for="bank">Account Holder: </label>
-        <span> Ilham God </span>
-      </div>
-
-      <div style="display: flex; gap: 12px">
-        <div>
-          <input id="sent-to-phone" name="sent-to-phone" type="checkbox" checked />
-          <label for="sent-to-phone">Send to Mobile Phone</label>
-        </div>
-        <div>
-          <input id="sent-to-email" name="sent-to-email" type="checkbox" checked readonly />
-          <label for="sent-to-email">Send to Email</label>
-        </div>
-      </div>
-
-      <button type="submit" style="padding: 10px 16px; width: fit-content">
-        Pay using QuidLink
-      </button>
-    </form>
-  </div>
-</body>
-
+  </body>
 </html>
