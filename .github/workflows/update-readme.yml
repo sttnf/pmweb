@@ -46,6 +46,7 @@ jobs:
             echo "routes_section_exists=true" >> $GITHUB_ENV
           else
             echo "routes_section_exists=false" >> $GITHUB_ENV
+          fi
 
       - name: Compare with existing README routes
         if: env.routes_section_exists == 'true'
@@ -58,6 +59,7 @@ jobs:
             echo "routes_changed=false" >> $GITHUB_ENV
           else
             echo "routes_changed=true" >> $GITHUB_ENV
+          fi
 
       - name: Update README with new routes
         if: env.routes_section_exists == 'false' || env.routes_changed == 'true'
