@@ -1,4 +1,51 @@
 ## File Routes
+## File Routes
+
+
+### pertemuan-2/cv
+- [/](https://sttnf.github.io/pmweb/pertemuan-2/cv/index)
+
+### pertemuan-2/e-commerce
+- [/](https://sttnf.github.io/pmweb/pertemuan-2/e-commerce/index)
+
+### pertemuan-2/praktikum
+- [/](https://sttnf.github.io/pmweb/pertemuan-2/praktikum/index)
+
+### pertemuan-3/pemesanan-barang
+- [/](https://sttnf.github.io/pmweb/pertemuan-3/pemesanan-barang/index)
+- [order](https://sttnf.github.io/pmweb/pertemuan-3/pemesanan-barang/order)
+
+### pertemuan-3/praktikum
+- [/](https://sttnf.github.io/pmweb/pertemuan-3/praktikum/index)
+- [order](https://sttnf.github.io/pmweb/pertemuan-3/praktikum/order)
+
+### pertemuan-4/cv
+- [/](https://sttnf.github.io/pmweb/pertemuan-4/cv/index)
+
+### pertemuan-4/praktikum
+- [footer](https://sttnf.github.io/pmweb/pertemuan-4/praktikum/footer)
+- [header](https://sttnf.github.io/pmweb/pertemuan-4/praktikum/header)
+- [/](https://sttnf.github.io/pmweb/pertemuan-4/praktikum/index)
+- [menu](https://sttnf.github.io/pmweb/pertemuan-4/praktikum/menu)
+
+### pertemuan-5/alpukat
+- [/](https://sttnf.github.io/pmweb/pertemuan-5/alpukat/index)
+
+### pertemuan-5/burung
+- [/](https://sttnf.github.io/pmweb/pertemuan-5/burung/index)
+
+### pertemuan-5/praktikum
+- [alpukat](https://sttnf.github.io/pmweb/pertemuan-5/praktikum/alpukat)
+
+### pertemuan-6/praktikum
+- [cssbox1](https://sttnf.github.io/pmweb/pertemuan-6/praktikum/cssbox1)
+- [cssbox2](https://sttnf.github.io/pmweb/pertemuan-6/praktikum/cssbox2)
+
+### pertemuan-6/tugas-2
+- [/](https://sttnf.github.io/pmweb/pertemuan-6/tugas-2/index)
+
+### pertemuan-6/tugas1
+- [/](https://sttnf.github.io/pmweb/pertemuan-6/tugas1/index)
 
 - [pertemuan-5/alpukat/index](https://sttnf.github.io/pmweb/pertemuan-5/alpukat/index)
 - [pertemuan-5/praktikum/alpukat](https://sttnf.github.io/pmweb/pertemuan-5/praktikum/alpukat)
