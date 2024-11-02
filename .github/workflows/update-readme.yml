@@ -28,6 +28,9 @@ jobs:
           EOL
           fi
 
+          # Check if any HTML files exist
+          files=$(find . -type f -name "*.html" ! -path "./README.md" | sort)
+
           # Generate new routes content
           {
             # Preserve existing content before routes section
@@ -40,52 +43,69 @@ jobs:
             # Add routes header with timestamp
             echo -e "\n## 📄 Available Routes\n"
             echo -e "*Last updated: $(date "+%Y-%m-%d %H:%M UTC")*\n"
-            echo -e "Browse through our available pages:\n"
 
-            # Track current folder for formatting
-            current_folder=""
-            
-            # Process all HTML files
-            find . -type f -name "*.html" ! -path "./README.md" | sort | while read -r file; do
-              # Clean up path
-              path=${file#./}
-              path=${path%.html}
-              folder=$(dirname "$path")
-              basename=$(basename "$path")
+            if [ -z "$files" ]; then
+              echo "🚧 No pages available yet."
+            else
+              echo -e "Browse through our available pages:\n"
 
-              # Handle folder headers
-              if [[ "$folder" != "." && "$folder" != "$current_folder" ]]; then
-                # Add emoji based on folder name
-                case "$folder" in
-                  *blog*) emoji="📝" ;;
-                  *docs*) emoji="📚" ;;
-                  *pages*) emoji="📃" ;;
-                  *api*) emoji="🛠️" ;;
-                  *) emoji="📁" ;;
-                esac
-                echo -e "\n### ${emoji} ${folder}\n"
-                current_folder="$folder"
-              fi
+              # Track current folder for formatting
+              current_folder=""
+              
+              # Process all HTML files
+              while IFS= read -r file; do
+                # Clean up path
+                path=${file#./}
+                path=${path%.html}
+                folder=$(dirname "$path")
+                basename=$(basename "$path")
 
-              # Format route entry
-              if [[ "$basename" == "index" ]]; then
-                # Handle index files
-                if [[ "$folder" == "." ]]; then
-                  echo "- [🏠 Homepage]($BASE_URL/)"
-                else
-                  echo "- [📍 ${folder}]($BASE_URL/$path)"
+                # Handle folder headers
+                if [[ "$folder" != "." && "$folder" != "$current_folder" ]]; then
+                  # Check if folder still has HTML files
+                  if [ -n "$(find "./$folder" -maxdepth 1 -name "*.html" 2>/dev/null)" ]; then
+                    # Add emoji based on folder name
+                    case "$folder" in
+                      *blog*) emoji="📝" ;;
+                      *docs*) emoji="📚" ;;
+                      *pages*) emoji="📃" ;;
+                      *api*) emoji="🛠️" ;;
+                      *) emoji="📁" ;;
+                    esac
+                    echo -e "\n### ${emoji} ${folder}\n"
+                    current_folder="$folder"
+                  fi
                 fi
-              else
-                # Handle regular files
-                # Capitalize first letter and replace hyphens with spaces
-                display_name=$(echo "$basename" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
-                echo "- [📄 ${display_name}]($BASE_URL/$folder/$basename)"
-              fi
-            done
 
-            # Add footer
+                # Only add file if it still exists
+                if [ -f "$file" ]; then
+                  # Format route entry
+                  if [[ "$basename" == "index" ]]; then
+                    # Handle index files
+                    if [[ "$folder" == "." ]]; then
+                      echo "- [🏠 Homepage]($BASE_URL/)"
+                    else
+                      echo "- [📍 ${folder}]($BASE_URL/$path)"
+                    fi
+                  else
+                    # Handle regular files
+                    # Capitalize first letter and replace hyphens with spaces
+                    display_name=$(echo "$basename" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+                    echo "- [📄 ${display_name}]($BASE_URL/$folder/$basename)"
+                  fi
+                fi
+              done <<< "$files"
+            fi
+
+            # Add footer with stats
             echo -e "\n---\n"
-            echo "💡 *Routes are automatically updated when new pages are added.*"
+            if [ -n "$files" ]; then
+              folder_count=$(echo "$files" | sed 's|/[^/]*$||' | sort -u | grep -v "^\.$" | wc -l)
+              file_count=$(echo "$files" | wc -l)
+              echo "📊 **Stats**: $file_count page(s) in $folder_count folder(s)"
+              echo -e ""
+            fi
+            echo "💡 *Routes are automatically updated when pages are added or removed.*"
           } > README.new
 
           # Update README if there are changes
@@ -103,7 +123,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "📝 Update available routes"
+          git commit -m "📝 Update available routes [skip ci]"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
