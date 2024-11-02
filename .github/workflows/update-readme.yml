@@ -3,11 +3,11 @@ name: Update README with File-based Routing
 on:
   push:
     branches:
-      - main # Adjust to your preferred branch
+      - main  # Adjust to your preferred branch
   workflow_dispatch:
 
 permissions:
-  contents: write # Allow the action to push changes
+  contents: write  # Allow the action to push changes
 
 jobs:
   update-readme:
@@ -16,32 +16,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Use PAT with push access
+          token: ${{ secrets.GITHUB_TOKEN }}  # Use PAT with push access
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16" # or whichever version you prefer
-
+          node-version: '16'
       - name: Generate Folder and File Routes
         id: generate_routes
+        env:
+          BASE_URL: "https://sttnf.github.io/pmweb"
         run: |
           # Create a temporary routes file
           echo "# File Routes\n" > file-routes.md
 
-          # Loop through the directory to list files and folders
-          for path in $(find . -type f -o -type d); do
-            # Remove "./" prefix
-            route=$(echo "$path" | sed 's|^\./||')
+          # Find only .html files, excluding README.md
+          for path in $(find . -type f -name "*.html" ! -path "./README.md"); do
+            # Remove "./" prefix and ".html" extension
+            route=$(echo "$path" | sed 's|^\./||; s|\.html$||')
 
-            # Format route path for the README structure
-            if [[ -d "$path" ]]; then
-              # If directory, use trailing slash
-              route="$route/"
-            fi
+            # Create the GitHub Pages-compatible URL
+            url="$BASE_URL/$route"
 
-            # Append formatted route to the temporary file
-            echo "- [$route]($route)" >> file-routes.md
+            # Append formatted route and URL to the temporary file
+            echo "- [$route]($url)" >> file-routes.md
           done
 
       - name: Check if README contains routes
@@ -88,4 +86,4 @@ jobs:
           git commit -m "Update README with file-based routes"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the PAT for push access
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the PAT for push access
