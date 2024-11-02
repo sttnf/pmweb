@@ -1,103 +1,109 @@
-name: Update README with File-based Routing
+name: Update README with File Routes
 
 on:
   push:
-    branches:
-      - main # Adjust to your preferred branch
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write # Allows the action to push changes
+  contents: write
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-
-      - name: Generate File Routes
-        id: generate_routes
+      - name: Update README with Routes
         env:
           BASE_URL: "https://sttnf.github.io/pmweb"
         run: |
-          # Initialize the routes markdown section
-          echo "## File Routes" > file-routes.md
-          echo "" >> file-routes.md
+          # Initialize or read README
+          if [ ! -f README.md ]; then
+            cat > README.md << 'EOL'
+          # Project Documentation
 
-          # Find all HTML files, excluding README.md, and sort them
-          files=$(find . -type f -name "*.html" ! -path "./README.md" | sort)
-
-          # Read existing routes from README.md for comparison
-          if grep -q "## File Routes" README.md; then
-            awk '/## File Routes/{flag=1; next} /##/{flag=0} flag' README.md > current-routes.md
-          else
-            touch current-routes.md
-            echo "First time initialization of File Routes section."
-            echo "should_commit=true" >> $GITHUB_ENV
+          Welcome to the project documentation. Below you'll find a list of all available pages.
+          EOL
           fi
 
-          # Initialize a variable to keep track of the current folder
-          current_folder=""
-          changes_found=false
-
-          # Loop through each file to group by folder
-          while read -r path; do
-            # Remove "./" prefix and ".html" extension
-            relative_path=$(echo "$path" | sed 's|^\./||; s|\.html$||')
-
-            # Extract the folder name (if any) and the file name
-            folder=$(dirname "$relative_path")
-            file=$(basename "$relative_path")
-
-            # Determine if this is an index file
-            if [[ "$file" == "index" ]]; then
-              route_text="/"
+          # Generate new routes content
+          {
+            # Preserve existing content before routes section
+            if grep -q "## 📄 Available Routes" README.md; then
+              sed '/## 📄 Available Routes/,$d' README.md
             else
-              route_text=$file
+              cat README.md
             fi
+            
+            # Add routes header with timestamp
+            echo -e "\n## 📄 Available Routes\n"
+            echo -e "*Last updated: $(date "+%Y-%m-%d %H:%M UTC")*\n"
+            echo -e "Browse through our available pages:\n"
 
-            # Check if the folder header exists in current README and add new entries only
-            folder_header="### $folder"
-            if grep -q "$folder_header" current-routes.md; then
-              # Only add files not already listed under the existing folder
-              if ! grep -q "\- \[$route_text\]" current-routes.md; then
-                echo "- [$route_text]($BASE_URL/$relative_path)" >> file-routes.md
-                changes_found=true
+            # Track current folder for formatting
+            current_folder=""
+            
+            # Process all HTML files
+            find . -type f -name "*.html" ! -path "./README.md" | sort | while read -r file; do
+              # Clean up path
+              path=${file#./}
+              path=${path%.html}
+              folder=$(dirname "$path")
+              basename=$(basename "$path")
+
+              # Handle folder headers
+              if [[ "$folder" != "." && "$folder" != "$current_folder" ]]; then
+                # Add emoji based on folder name
+                case "$folder" in
+                  *blog*) emoji="📝" ;;
+                  *docs*) emoji="📚" ;;
+                  *pages*) emoji="📃" ;;
+                  *api*) emoji="🛠️" ;;
+                  *) emoji="📁" ;;
+                esac
+                echo -e "\n### ${emoji} ${folder}\n"
+                current_folder="$folder"
               fi
-            else
-              # New folder - add header and file
-              echo -e "\n### $folder" >> file-routes.md
-              echo "- [$route_text]($BASE_URL/$relative_path)" >> file-routes.md
-              changes_found=true
-            fi
-          done <<< "$files"
 
-          # Add all routes if this is the initial run or update if there are changes
-          if [ "$changes_found" = true ] || [ "$GITHUB_ENV" = "should_commit=true" ]; then
-            awk -v new_routes="$(cat file-routes.md)" '/## File Routes/{print; print new_routes; next}1' README.md > README.tmp
-            mv README.tmp README.md
-            echo "README updated."
+              # Format route entry
+              if [[ "$basename" == "index" ]]; then
+                # Handle index files
+                if [[ "$folder" == "." ]]; then
+                  echo "- [🏠 Homepage]($BASE_URL/)"
+                else
+                  echo "- [📍 ${folder}]($BASE_URL/$path)"
+                fi
+              else
+                # Handle regular files
+                # Capitalize first letter and replace hyphens with spaces
+                display_name=$(echo "$basename" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+                echo "- [📄 ${display_name}]($BASE_URL/$folder/$basename)"
+              fi
+            done
+
+            # Add footer
+            echo -e "\n---\n"
+            echo "💡 *Routes are automatically updated when new pages are added.*"
+          } > README.new
+
+          # Update README if there are changes
+          if ! cmp -s README.md README.new; then
+            mv README.new README.md
             echo "should_commit=true" >> $GITHUB_ENV
           else
-            echo "No changes detected."
+            rm README.new
+            echo "should_commit=false" >> $GITHUB_ENV
           fi
-
-          # Clean up temporary files
-          rm -f current-routes.md file-routes.md
 
       - name: Commit and Push changes
         if: env.should_commit == 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md  # Only add README.md
-          git commit -m "Update README with file-based routes"
+          git add README.md
+          git commit -m "📝 Update available routes"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
