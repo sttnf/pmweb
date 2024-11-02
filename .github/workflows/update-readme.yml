@@ -3,8 +3,11 @@ name: Update README with File-based Routing
 on:
   push:
     branches:
-      - main  # Adjust to your preferred branch
+      - main # Adjust to your preferred branch
   workflow_dispatch:
+
+permissions:
+  contents: write # Allow the action to push changes
 
 jobs:
   update-readme:
@@ -12,11 +15,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT_TOKEN }} # Use GitHub's provided token with write permissions
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # or whichever version you prefer
+          node-version: "16" # or whichever version you prefer
 
       - name: Generate Folder and File Routes
         id: generate_routes
