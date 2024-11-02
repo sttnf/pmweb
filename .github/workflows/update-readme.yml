@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Allow the action to push changes
+  contents: write  # Allows the action to push changes
 
 jobs:
   update-readme:
@@ -15,70 +15,51 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # Use PAT with push access
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '16'
-      - name: Generate Folder and File Routes
+
+      - name: Generate File Routes
         id: generate_routes
         env:
           BASE_URL: "https://sttnf.github.io/pmweb"
         run: |
-          # Create a temporary routes file
-          echo "# File Routes\n" > file-routes.md
+          # Initialize routes markdown section
+          echo "## File Routes" > file-routes.md
+          echo "" >> file-routes.md
 
-          # Find only .html files, excluding README.md
-          for path in $(find . -type f -name "*.html" ! -path "./README.md"); do
-            # Remove "./" prefix and ".html" extension
+          # List all .html files, excluding README.md, and generate links
+          find . -type f -name "*.html" ! -path "./README.md" | while read path; do
+            # Format the path and URL
             route=$(echo "$path" | sed 's|^\./||; s|\.html$||')
-
-            # Create the GitHub Pages-compatible URL
             url="$BASE_URL/$route"
-
-            # Append formatted route and URL to the temporary file
             echo "- [$route]($url)" >> file-routes.md
           done
 
-      - name: Check if README contains routes
-        id: check_readme
+      - name: Check and Update README
         run: |
           if grep -q "## File Routes" README.md; then
-            echo "routes_section_exists=true" >> $GITHUB_ENV
-          else
-            echo "routes_section_exists=false" >> $GITHUB_ENV
-          fi
+            # Extract the current routes section
+            awk '/## File Routes/{flag=1; next} /##/{flag=0} flag' README.md > current-routes.md || true
 
-      - name: Compare with existing README routes
-        if: env.routes_section_exists == 'true'
-        id: compare_routes
-        run: |
-          # Extract current routes from README
-          awk '/## File Routes/{flag=1; next} /##/{flag=0} flag' README.md > current-routes.md
-          # Check if there are any changes between generated and current routes
-          if cmp -s file-routes.md current-routes.md; then
-            echo "routes_changed=false" >> $GITHUB_ENV
+            # Check if there's a difference
+            if ! cmp -s file-routes.md current-routes.md; then
+              awk -v new_routes="$(cat file-routes.md)" '/## File Routes/{print; print new_routes; next}1' README.md > README.tmp
+              mv README.tmp README.md
+              echo "README updated."
+              echo "should_commit=true" >> $GITHUB_ENV
+            fi
           else
-            echo "routes_changed=true" >> $GITHUB_ENV
-          fi
-
-      - name: Update README with new routes
-        if: env.routes_section_exists == 'false' || env.routes_changed == 'true'
-        run: |
-          routes=$(cat file-routes.md)
-          if [ "$routes_section_exists" == "false" ]; then
-            # Add routes section if it doesn't exist
-            echo -e "## File Routes\n$routes" >> README.md
-          else
-            # Replace existing routes section
-            awk -v new_routes="$routes" '/## File Routes/{print; print new_routes; next}1' README.md > README.tmp
-            mv README.tmp README.md
+            # If no routes section exists, append it
+            cat file-routes.md >> README.md
+            echo "README updated with new routes section."
+            echo "should_commit=true" >> $GITHUB_ENV
           fi
 
       - name: Commit and Push changes
-        if: env.routes_section_exists == 'false' || env.routes_changed == 'true'
+        if: env.should_commit == 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -86,4 +67,4 @@ jobs:
           git commit -m "Update README with file-based routes"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the PAT for push access
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
