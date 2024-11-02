@@ -2,9 +2,10 @@
 
 Welcome to the project documentation. Below you'll find a list of all available pages.
 
+
 ## 📄 Available Routes
 
-*Last updated: 2024-11-02 05:33 UTC*
+*Last updated: 2024-11-02 05:39 UTC*
 
 Browse through our available pages:
 
@@ -59,14 +60,16 @@ Browse through our available pages:
 - [📄 Cssbox1](https://sttnf.github.io/pmweb/pertemuan-6/praktikum/cssbox1)
 - [📄 Cssbox2](https://sttnf.github.io/pmweb/pertemuan-6/praktikum/cssbox2)
 
+### 📁 pertemuan-6/tugas-1
+
+- [📍 pertemuan-6/tugas-1](https://sttnf.github.io/pmweb/pertemuan-6/tugas-1/index)
+
 ### 📁 pertemuan-6/tugas-2
 
 - [📍 pertemuan-6/tugas-2](https://sttnf.github.io/pmweb/pertemuan-6/tugas-2/index)
 
-### 📁 pertemuan-6/tugas1
-
-- [📍 pertemuan-6/tugas1](https://sttnf.github.io/pmweb/pertemuan-6/tugas1/index)
-
 ---
 
-💡 *Routes are automatically updated when new pages are added.*
+📊 **Stats**: 19 page(s) in 13 folder(s)
+
+💡 *Routes are automatically updated when pages are added or removed.*
