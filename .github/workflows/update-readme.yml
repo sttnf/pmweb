@@ -86,12 +86,15 @@ jobs:
             echo "No changes detected."
           fi
 
+          # Clean up temporary files
+          rm -f current-routes.md file-routes.md
+
       - name: Commit and Push changes
         if: env.should_commit == 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
+          git add README.md  # Only add README.md
           git commit -m "Update README with file-based routes"
           git push
         env:
