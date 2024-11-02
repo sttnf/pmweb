@@ -26,17 +26,43 @@ jobs:
         env:
           BASE_URL: "https://sttnf.github.io/pmweb"
         run: |
-          # Initialize routes markdown section
+          # Initialize the routes markdown section
           echo "## File Routes" > file-routes.md
           echo "" >> file-routes.md
 
-          # List all .html files, excluding README.md, and generate links
-          find . -type f -name "*.html" ! -path "./README.md" | while read path; do
-            # Format the path and URL
-            route=$(echo "$path" | sed 's|^\./||; s|\.html$||')
-            url="$BASE_URL/$route"
-            echo "- [$route]($url)" >> file-routes.md
-          done
+          # Find all HTML files, excluding README.md, and sort them
+          files=$(find . -type f -name "*.html" ! -path "./README.md" | sort)
+
+          # Initialize a variable to keep track of the current folder
+          current_folder=""
+
+          # Loop through each file to group by folder
+          while read -r path; do
+            # Remove "./" prefix and ".html" extension
+            relative_path=$(echo "$path" | sed 's|^\./||; s|\.html$||')
+
+            # Extract the folder name (if any) and the file name
+            folder=$(dirname "$relative_path")
+            file=$(basename "$relative_path")
+
+            # Format the route text ("/" for index files)
+            route_text=$file
+            if [[ "$file" == "index" ]]; then
+              route_text="/"
+            fi
+
+            # Add a new folder header if we've moved to a different folder
+            if [[ "$folder" != "." && "$folder" != "$current_folder" ]]; then
+              echo -e "\n### $folder" >> file-routes.md
+              current_folder="$folder"
+            fi
+
+            # Create the GitHub Pages-compatible URL
+            url="$BASE_URL/$relative_path"
+            
+            # Append the route with URL to the routes file
+            echo "- [$route_text]($url)" >> file-routes.md
+          done <<< "$files"
 
       - name: Check and Update README
         run: |
