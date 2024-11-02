@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PAT_TOKEN }} # Use GitHub's provided token with write permissions
+          token: ${{ secrets.GITHUB_TOKEN }} # Use PAT with push access
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -87,3 +87,5 @@ jobs:
           git add README.md
           git commit -m "Update README with file-based routes"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the PAT for push access
