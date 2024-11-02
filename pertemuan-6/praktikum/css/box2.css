@@ -1,0 +1,13 @@
+body {
+  background-color: #ff5509;
+  display: flex;
+}
+
+.foto {
+  margin: 20px;
+}
+
+.foto img {
+  width: 270px;
+  height: 320px;
+}
