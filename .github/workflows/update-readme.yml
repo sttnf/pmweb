@@ -1,0 +1,82 @@
+name: Update README with File-based Routing
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your preferred branch
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # or whichever version you prefer
+
+      - name: Generate Folder and File Routes
+        id: generate_routes
+        run: |
+          # Create a temporary routes file
+          echo "# File Routes\n" > file-routes.md
+
+          # Loop through the directory to list files and folders
+          for path in $(find . -type f -o -type d); do
+            # Remove "./" prefix
+            route=$(echo "$path" | sed 's|^\./||')
+
+            # Format route path for the README structure
+            if [[ -d "$path" ]]; then
+              # If directory, use trailing slash
+              route="$route/"
+            fi
+
+            # Append formatted route to the temporary file
+            echo "- [$route]($route)" >> file-routes.md
+          done
+
+      - name: Check if README contains routes
+        id: check_readme
+        run: |
+          if grep -q "## File Routes" README.md; then
+            echo "routes_section_exists=true" >> $GITHUB_ENV
+          else
+            echo "routes_section_exists=false" >> $GITHUB_ENV
+
+      - name: Compare with existing README routes
+        if: env.routes_section_exists == 'true'
+        id: compare_routes
+        run: |
+          # Extract current routes from README
+          awk '/## File Routes/{flag=1; next} /##/{flag=0} flag' README.md > current-routes.md
+          # Check if there are any changes between generated and current routes
+          if cmp -s file-routes.md current-routes.md; then
+            echo "routes_changed=false" >> $GITHUB_ENV
+          else
+            echo "routes_changed=true" >> $GITHUB_ENV
+
+      - name: Update README with new routes
+        if: env.routes_section_exists == 'false' || env.routes_changed == 'true'
+        run: |
+          routes=$(cat file-routes.md)
+          if [ "$routes_section_exists" == "false" ]; then
+            # Add routes section if it doesn't exist
+            echo -e "## File Routes\n$routes" >> README.md
+          else
+            # Replace existing routes section
+            awk -v new_routes="$routes" '/## File Routes/{print; print new_routes; next}1' README.md > README.tmp
+            mv README.tmp README.md
+          fi
+
+      - name: Commit and Push changes
+        if: env.routes_section_exists == 'false' || env.routes_changed == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update README with file-based routes"
+          git push
