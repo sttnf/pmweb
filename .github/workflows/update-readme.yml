@@ -45,10 +45,11 @@ jobs:
             folder=$(dirname "$relative_path")
             file=$(basename "$relative_path")
 
-            # Format the route text ("/" for index files)
-            route_text=$file
+            # Determine if this is an index file
             if [[ "$file" == "index" ]]; then
               route_text="/"
+            else
+              route_text=$file
             fi
 
             # Add a new folder header if we've moved to a different folder
@@ -59,7 +60,7 @@ jobs:
 
             # Create the GitHub Pages-compatible URL
             url="$BASE_URL/$relative_path"
-            
+
             # Append the route with URL to the routes file
             echo "- [$route_text]($url)" >> file-routes.md
           done <<< "$files"
