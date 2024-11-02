@@ -33,8 +33,16 @@ jobs:
           # Find all HTML files, excluding README.md, and sort them
           files=$(find . -type f -name "*.html" ! -path "./README.md" | sort)
 
+          # Read existing routes from README.md for comparison
+          if grep -q "## File Routes" README.md; then
+            awk '/## File Routes/{flag=1; next} /##/{flag=0} flag' README.md > current-routes.md
+          else
+            touch current-routes.md
+          fi
+
           # Initialize a variable to keep track of the current folder
           current_folder=""
+          changes_found=false
 
           # Loop through each file to group by folder
           while read -r path; do
@@ -52,37 +60,30 @@ jobs:
               route_text=$file
             fi
 
-            # Add a new folder header if we've moved to a different folder
-            if [[ "$folder" != "." && "$folder" != "$current_folder" ]]; then
+            # Check if the folder header exists in current README and add new entries only
+            folder_header="### $folder"
+            if grep -q "$folder_header" current-routes.md; then
+              # Only add files not already listed under the existing folder
+              if ! grep -q "\- \[$route_text\]" current-routes.md; then
+                echo "- [$route_text]($BASE_URL/$relative_path)" >> file-routes.md
+                changes_found=true
+              fi
+            else
+              # New folder - add header and file
               echo -e "\n### $folder" >> file-routes.md
-              current_folder="$folder"
+              echo "- [$route_text]($BASE_URL/$relative_path)" >> file-routes.md
+              changes_found=true
             fi
-
-            # Create the GitHub Pages-compatible URL
-            url="$BASE_URL/$relative_path"
-
-            # Append the route with URL to the routes file
-            echo "- [$route_text]($url)" >> file-routes.md
           done <<< "$files"
 
-      - name: Check and Update README
-        run: |
-          if grep -q "## File Routes" README.md; then
-            # Extract the current routes section
-            awk '/## File Routes/{flag=1; next} /##/{flag=0} flag' README.md > current-routes.md || true
-
-            # Check if there's a difference
-            if ! cmp -s file-routes.md current-routes.md; then
-              awk -v new_routes="$(cat file-routes.md)" '/## File Routes/{print; print new_routes; next}1' README.md > README.tmp
-              mv README.tmp README.md
-              echo "README updated."
-              echo "should_commit=true" >> $GITHUB_ENV
-            fi
-          else
-            # If no routes section exists, append it
-            cat file-routes.md >> README.md
-            echo "README updated with new routes section."
+          # If changes are found, prepare to update README.md
+          if [ "$changes_found" = true ]; then
+            awk -v new_routes="$(cat file-routes.md)" '/## File Routes/{print; print new_routes; next}1' README.md > README.tmp
+            mv README.tmp README.md
+            echo "README updated."
             echo "should_commit=true" >> $GITHUB_ENV
+          else
+            echo "No changes detected."
           fi
 
       - name: Commit and Push changes
