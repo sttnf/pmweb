@@ -3,9 +3,10 @@
 Welcome to the project documentation. Below you'll find a list of all available pages.
 
 
+
 ## 📄 Available Routes
 
-*Last updated: 2024-11-02 05:39 UTC*
+*Last updated: 2024-11-09 03:22 UTC*
 
 Browse through our available pages:
 
@@ -68,8 +69,16 @@ Browse through our available pages:
 
 - [📍 pertemuan-6/tugas-2](https://sttnf.github.io/pmweb/pertemuan-6/tugas-2/index)
 
+### 📁 pertemuan-7/praktikum/p-1
+
+- [📍 pertemuan-7/praktikum/p-1](https://sttnf.github.io/pmweb/pertemuan-7/praktikum/p-1/index)
+
+### 📁 pertemuan-7/praktikum/p-2
+
+- [📍 pertemuan-7/praktikum/p-2](https://sttnf.github.io/pmweb/pertemuan-7/praktikum/p-2/index)
+
 ---
 
-📊 **Stats**: 19 page(s) in 13 folder(s)
+📊 **Stats**: 21 page(s) in 15 folder(s)
 
 💡 *Routes are automatically updated when pages are added or removed.*
