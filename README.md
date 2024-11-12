@@ -5,9 +5,10 @@ Welcome to the project documentation. Below you'll find a list of all available 
 
 
 
+
 ## 📄 Available Routes
 
-*Last updated: 2024-11-12 00:32 UTC*
+*Last updated: 2024-11-12 04:50 UTC*
 
 Browse through our available pages:
 
@@ -82,8 +83,12 @@ Browse through our available pages:
 
 - [📍 pertemuan-7/tugas-1](https://sttnf.github.io/pmweb/pertemuan-7/tugas-1/index)
 
+### 📁 uts
+
+- [📍 uts](https://sttnf.github.io/pmweb/uts/index)
+
 ---
 
-📊 **Stats**: 22 page(s) in 16 folder(s)
+📊 **Stats**: 23 page(s) in 17 folder(s)
 
 💡 *Routes are automatically updated when pages are added or removed.*
