@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menghitung Jumlah Dua Bilangan</title>
+  </head>
+  <body>
+    <h1>Menghitung Jumlah Dua Bilangan</h1>
+
+    <label for="number1">Bilangan 1:</label>
+    <input
+      type="number"
+      name="number1"
+      id="number1"
+      min="1"
+      placeholder="Masukan Bilangan 1"
+      onchange="calculateSum()"
+    />
+
+    <label for="number2">Bilangan 2:</label>
+    <input
+      type="number"
+      name="number2"
+      id="number2"
+      min="1"
+      placeholder="Masukan Bilangan 2"
+      onchange="calculateSum()"
+    />
+
+    <div id="result"></div>
+
+    <script src="../assets/js/script.js"></script>
+  </body>
+</html>
