@@ -12,9 +12,10 @@ Welcome to the project documentation. Below you'll find a list of all available 
 
 
 
+
 ## 📄 Available Routes
 
-*Last updated: 2024-11-23 02:13 UTC*
+*Last updated: 2024-11-23 03:35 UTC*
 
 Browse through our available pages:
 
@@ -93,8 +94,24 @@ Browse through our available pages:
 
 - [📍 pertemuan-8-uts](https://sttnf.github.io/pmweb/pertemuan-8-uts/index)
 
+### 📁 pertemuan-9/praktikum/p-1
+
+- [📍 pertemuan-9/praktikum/p-1](https://sttnf.github.io/pmweb/pertemuan-9/praktikum/p-1/index)
+
+### 📁 pertemuan-9/praktikum/p-2
+
+- [📍 pertemuan-9/praktikum/p-2](https://sttnf.github.io/pmweb/pertemuan-9/praktikum/p-2/index)
+
+### 📁 pertemuan-9/praktikum/p-3
+
+- [📍 pertemuan-9/praktikum/p-3](https://sttnf.github.io/pmweb/pertemuan-9/praktikum/p-3/index)
+
+### 📁 pertemuan-9/praktikum/p-4
+
+- [📍 pertemuan-9/praktikum/p-4](https://sttnf.github.io/pmweb/pertemuan-9/praktikum/p-4/index)
+
 ---
 
-📊 **Stats**: 23 page(s) in 17 folder(s)
+📊 **Stats**: 27 page(s) in 21 folder(s)
 
 💡 *Routes are automatically updated when pages are added or removed.*
