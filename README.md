@@ -11,9 +11,10 @@ Welcome to the project documentation. Below you'll find a list of all available 
 
 
 
+
 ## 📄 Available Routes
 
-*Last updated: 2024-11-16 04:02 UTC*
+*Last updated: 2024-11-23 02:13 UTC*
 
 Browse through our available pages:
 
@@ -88,9 +89,9 @@ Browse through our available pages:
 
 - [📍 pertemuan-7/tugas-1](https://sttnf.github.io/pmweb/pertemuan-7/tugas-1/index)
 
-### 📁 uts
+### 📁 pertemuan-8-uts
 
-- [📍 uts](https://sttnf.github.io/pmweb/uts/index)
+- [📍 pertemuan-8-uts](https://sttnf.github.io/pmweb/pertemuan-8-uts/index)
 
 ---
 
