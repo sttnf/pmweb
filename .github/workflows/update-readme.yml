@@ -57,57 +57,82 @@ jobs:
 
             echo -e "<details>\n<summary>Click to expand routes and folders</summary>\n"
 
-            # Group HTML files by directory
-            declare -A folder_files
-            declare -A index_files
+            # Declare associative arrays
+            declare -A folder_files=()
+            declare -A index_files=()
 
+            # Group HTML files by directory
             for file in "${html_files[@]}"; do
               clean_path=$(sanitize_path "${file#./}")
               folder=$(dirname "$clean_path")
               basename=$(basename "$clean_path")
               
-              [[ "$basename" == "index" ]] && index_files["$folder"]="$file"
+              # Track index files
+              if [[ "$basename" == "index" ]]; then
+                index_files["$folder"]="$file"
+              fi
+              
+              # Group files by folder
               [[ "$folder" == "." ]] && folder=""
-              folder_files["$folder"]+="$file "
+              if [[ -z "${folder_files[$folder]:-}" ]]; then
+                folder_files["$folder"]="$file"
+              else
+                folder_files["$folder"]+=" $file"
+              fi
             done
 
             # Process directories
             for dir in "${dirs[@]}"; do
               [[ "$dir" == "." ]] && continue
 
-              # Skip empty directories
-              [[ -z "${folder_files[$dir]}" && -z "${index_files[$dir]}" ]] && continue
+              # Skip directories with no files
+              dir_files="${folder_files[$dir]:-}"
+              dir_index="${index_files[$dir]:-}"
+              
+              if [[ -z "$dir_files" && -z "$dir_index" ]]; then
+                continue
+              fi
 
               folder_emoji=$(get_folder_emoji "$dir")
-              index_route=${index_files[$dir]:+/$dir}
+              index_route=""
+              [[ -n "$dir_index" ]] && index_route="/$dir"
 
               echo -e "\n### ${folder_emoji} ${dir}\n"
               [[ -n "$index_route" ]] && echo "- [🏠 ${dir} Overview]($BASE_URL$index_route)"
 
-              for file in ${folder_files[$dir]}; do
-                clean_path=$(sanitize_path "${file#./}")
-                basename=$(basename "$clean_path")
-                [[ "$basename" == "index" ]] && continue
+              # Process files in this directory
+              if [[ -n "$dir_files" ]]; then
+                for file in $dir_files; do
+                  clean_path=$(sanitize_path "${file#./}")
+                  basename=$(basename "$clean_path")
+                  [[ "$basename" == "index" ]] && continue
 
-                display_name=$(format_display_name "$basename")
-                echo "- [📄 $display_name]($BASE_URL/$clean_path)"
-              done
+                  display_name=$(format_display_name "$basename")
+                  echo "- [📄 $display_name]($BASE_URL/$clean_path)"
+                done
+              fi
             done
 
-            # Handle root directory
+            # Handle root directory separately
             root_files="${folder_files[.]:-}"
-            if [[ -n "${index_files[.]:-}" || -n "$root_files" ]]; then
+            root_index="${index_files[.]:-}"
+            if [[ -n "$root_index" || -n "$root_files" ]]; then
               echo -e "\n### 🏠 Root\n"
-              [[ -n "${index_files[.]:-}" ]] && echo "- [🏠 Homepage]($BASE_URL/)"
+              
+              # Display root index if exists
+              [[ -n "$root_index" ]] && echo "- [🏠 Homepage]($BASE_URL/)"
 
-              for file in $root_files; do
-                clean_path=$(sanitize_path "${file#./}")
-                basename=$(basename "$clean_path")
-                [[ "$basename" == "index" ]] && continue
+              # Process root files
+              if [[ -n "$root_files" ]]; then
+                for file in $root_files; do
+                  clean_path=$(sanitize_path "${file#./}")
+                  basename=$(basename "$clean_path")
+                  [[ "$basename" == "index" ]] && continue
 
-                display_name=$(format_display_name "$basename")
-                echo "- [📄 $display_name]($BASE_URL/$clean_path)"
-              done
+                  display_name=$(format_display_name "$basename")
+                  echo "- [📄 $display_name]($BASE_URL/$clean_path)"
+                done
+              fi
             fi
 
             echo -e "\n</details>\n---\n"
