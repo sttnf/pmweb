@@ -48,9 +48,9 @@ jobs:
           Welcome to our project pages.
           EOL
 
-          # Find and Process HTML Files
-          html_files=$(find . -type f -name "*.html" ! -path "./README.md")
-          
+          # Find and Sort HTML Files
+          mapfile -t sorted_files < <(find . -type f -name "*.html" ! -path "./README.md" | sort)
+
           # Generate Routes Documentation
           {
             # Preserve content before routes section
@@ -61,44 +61,65 @@ jobs:
             echo -e "*Last updated: $(date "+%Y-%m-%d %H:%M UTC")*\n"
 
             # Check if any files exist
-            if [[ -z "$html_files" ]]; then
+            if [[ ${#sorted_files[@]} -eq 0 ]]; then
               echo "🚧 No pages available yet."
             else
               echo -e "<details>\n<summary>Click to expand routes</summary>\n"
               echo -e "Browse through our available pages:\n"
 
-              current_folder=""
-              while IFS= read -r file; do
-                # Sanitize and process file path
+              # Group files by folder and sort
+              declare -A folder_groups
+              for file in "${sorted_files[@]}"; do
                 clean_path=$(sanitize_path "${file#./}")
                 folder=$(dirname "$clean_path")
-                basename=$(basename "$clean_path")
+                [[ "$folder" == "." ]] && folder=""
+                folder_groups["$folder"]+="$file "
+              done
 
-                # Folder Header Logic
-                if [[ "$folder" != "." && "$folder" != "$current_folder" ]]; then
+              # Sort folders
+              mapfile -t sorted_folders < <(printf '%s\n' "${!folder_groups[@]}" | sort)
+
+              # Process sorted folders and their files
+              for folder in "${sorted_folders[@]}"; do
+                # Prepare files for this folder
+                IFS=' ' read -ra folder_files <<< "${folder_groups[$folder]}"
+                
+                # Skip if no files
+                [[ ${#folder_files[@]} -eq 0 ]] && continue
+
+                # Folder Header
+                if [[ -n "$folder" ]]; then
                   folder_emoji=$(get_folder_emoji "$folder")
                   echo -e "\n### ${folder_emoji} ${folder}\n"
-                  current_folder="$folder"
                 fi
 
-                # Route Generation
-                if [[ -f "$file" ]]; then
+                # Sort and generate routes for this folder
+                mapfile -t sorted_folder_files < <(printf '%s\n' "${folder_files[@]}" | sort)
+                
+                for file in "${sorted_folder_files[@]}"; do
+                  # Sanitize and process file path
+                  clean_path=$(sanitize_path "${file#./}")
+                  folder=$(dirname "$clean_path")
+                  basename=$(basename "$clean_path")
+
+                  # Route Generation
                   if [[ "$basename" == "index" ]]; then
                     route=$([ "$folder" = "." ] && echo "/" || echo "/$folder")
-                    echo "- [🏠 ${folder:-Homepage}]($BASE_URL$route)"
+                    display_name=$([ "$folder" = "." ] && echo "Homepage" || echo "$folder")
+                    echo "- [🏠 $display_name]($BASE_URL$route)"
                   else
                     display_name=$(format_display_name "$basename")
                     echo "- [📄 $display_name]($BASE_URL/$clean_path)"
                   fi
-                fi
-              done <<< "$html_files"
+                done
+              done
 
               echo -e "\n</details>"
 
               # Stats Footer
               echo -e "\n---\n"
-              folder_count=$(echo "$html_files" | sed 's|/[^/]*$||' | sort -u | grep -v "^\.$" | wc -l)
-              file_count=$(echo "$html_files" | wc -l)
+              folder_count=${#sorted_folders[@]}
+              file_count=${#sorted_files[@]}
               echo "📊 **Stats**: $file_count page(s) in $folder_count folder(s)"
               echo -e "\n💡 *Routes auto-updated on page changes.*"
             fi
