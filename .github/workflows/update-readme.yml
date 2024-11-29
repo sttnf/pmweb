@@ -21,17 +21,24 @@ jobs:
           #!/bin/bash
           set -euo pipefail
 
-          # Simplified utility functions
-          sanitize_path() { echo "$1" | tr ' ' '-' | sed -E 's/\.html$//' ; }
+          # Utility functions
+          sanitize_path() { 
+            echo "$1" | tr ' ' '-' | sed -E 's/\.html$//'
+          }
+
           get_folder_emoji() {
-            case "$1" in
-              *blog*) echo "📝" ;;
+            local path="$1"
+            case "$path" in
               *docs*) echo "📚" ;;
-              *pages*) echo "📃" ;;
-              *api*) echo "🛠️" ;;
+              *src*) echo "💻" ;;
+              *test*) echo "🧪" ;;
+              *build*) echo "🏗️" ;;
+              *script*) echo "🔧" ;;
+              *config*) echo "⚙️" ;;
               *) echo "📁" ;;
             esac
           }
+
           format_display_name() { 
             echo "$1" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1'
           }
@@ -39,14 +46,12 @@ jobs:
           # Create README if not exists
           [[ -f README.md ]] || echo "# Project Documentation" > README.md
 
-          # Find HTML files and non-hidden directories
-          mapfile -t html_files < <(find . -type f -name "*.html" ! -path "./README.md" | sort)
-          mapfile -t dirs < <(find . -type d ! -path '*/\.*' | sed 's|^\./||' | sort)
+          # Find all HTML files, excluding README and hidden paths
+          mapfile -t all_html_files < <(find . -type f -name "*.html" ! -path "./README.md" ! -path '*/\.*' | sort)
 
-          # Exit if no files or directories
-          [[ ${#html_files[@]} -eq 0 && ${#dirs[@]} -eq 0 ]] && exit 0
+          # Exit if no files found
+          [[ ${#all_html_files[@]} -eq 0 ]] && exit 0
 
-          # Generate routes documentation
           {
             # Preserve content before routes section
             sed '/## 📄 Available Routes/,$d' README.md
@@ -57,86 +62,60 @@ jobs:
 
             echo -e "<details>\n<summary>Click to expand routes and folders</summary>\n"
 
-            # Declare associative arrays
-            declare -A folder_files=()
-            declare -A index_files=()
+            # Declare a function to process directories recursively
+            process_directory() {
+              local base_path="$1"
+              local indent="${2:-}"
+              local depth="${3:-0}"
 
-            # Group HTML files by directory
-            for file in "${html_files[@]}"; do
-              clean_path=$(sanitize_path "${file#./}")
-              folder=$(dirname "$clean_path")
-              basename=$(basename "$clean_path")
-              
-              # Track index files
-              if [[ "$basename" == "index" ]]; then
-                index_files["$folder"]="$file"
+              # Find index and other files in this directory
+              local index_file=$(find "$base_path" -maxdepth 1 -type f -name "index.html")
+              local other_files=$(find "$base_path" -maxdepth 1 -type f -name "*.html" ! -name "index.html")
+              local subdirs=$(find "$base_path" -maxdepth 1 -type d ! -path '*/\.*' | tail -n +2)
+
+              # Only process if there are files or subdirectories
+              if [[ -n "$index_file$other_files$subdirs" ]]; then
+                # Get folder emoji
+                local folder_emoji=$(get_folder_emoji "$base_path")
+                local relative_path="${base_path#./}"
+
+                # Print directory header
+                if [[ "$depth" -gt 0 ]]; then
+                  echo "${indent}#### ${folder_emoji} ${relative_path}"
+                else
+                  echo "${indent}### ${folder_emoji} ${relative_path}"
+                fi
+                echo ""
+
+                # Print index route if exists
+                if [[ -n "$index_file" ]]; then
+                  echo "${indent}- [🏠 ${relative_path##*/}]($BASE_URL/${relative_path})"
+                fi
+
+                # Process other files in this directory
+                if [[ -n "$other_files" ]]; then
+                  while IFS= read -r file; do
+                    local clean_path=$(sanitize_path "${file#./}")
+                    local basename=$(basename "$clean_path" .html)
+                    local display_name=$(format_display_name "$basename")
+                    echo "${indent}- [📄 $display_name]($BASE_URL/$clean_path)"
+                  done <<< "$other_files"
+                fi
+
+                # Recursively process subdirectories
+                if [[ -n "$subdirs" ]]; then
+                  while IFS= read -r subdir; do
+                    process_directory "$subdir" "$indent  " $((depth + 1))
+                  done <<< "$subdirs"
+                fi
               fi
-              
-              # Group files by folder
-              [[ "$folder" == "." ]] && folder=""
-              if [[ -z "${folder_files[$folder]:-}" ]]; then
-                folder_files["$folder"]="$file"
-              else
-                folder_files["$folder"]+=" $file"
-              fi
-            done
+            }
 
-            # Process directories
-            for dir in "${dirs[@]}"; do
-              [[ "$dir" == "." ]] && continue
-
-              # Skip directories with no files
-              dir_files="${folder_files[$dir]:-}"
-              dir_index="${index_files[$dir]:-}"
-              
-              if [[ -z "$dir_files" && -z "$dir_index" ]]; then
-                continue
-              fi
-
-              folder_emoji=$(get_folder_emoji "$dir")
-              index_route=""
-              [[ -n "$dir_index" ]] && index_route="/$dir"
-
-              echo -e "\n### ${folder_emoji} ${dir}\n"
-              [[ -n "$index_route" ]] && echo "- [🏠 ${dir}]($BASE_URL$index_route)"
-
-              # Process files in this directory
-              if [[ -n "$dir_files" ]]; then
-                for file in $dir_files; do
-                  clean_path=$(sanitize_path "${file#./}")
-                  basename=$(basename "$clean_path")
-                  [[ "$basename" == "index" ]] && continue
-
-                  display_name=$(format_display_name "$basename")
-                  echo "- [📄 $display_name]($BASE_URL/$clean_path)"
-                done
-              fi
-            done
-
-            # Handle root directory separately
-            root_files="${folder_files[.]:-}"
-            root_index="${index_files[.]:-}"
-            if [[ -n "$root_index" || -n "$root_files" ]]; then
-              echo -e "\n### 🏠 Root\n"
-              
-              # Display root index if exists
-              [[ -n "$root_index" ]] && echo "- [🏠 Homepage]($BASE_URL/)"
-
-              # Process root files
-              if [[ -n "$root_files" ]]; then
-                for file in $root_files; do
-                  clean_path=$(sanitize_path "${file#./}")
-                  basename=$(basename "$clean_path")
-                  [[ "$basename" == "index" ]] && continue
-
-                  display_name=$(format_display_name "$basename")
-                  echo "- [📄 $display_name]($BASE_URL/$clean_path)"
-                done
-              fi
-            fi
+            # Start processing from root
+            process_directory "."
 
             echo -e "\n</details>\n---\n"
-            echo "📊 **Stats**: ${#html_files[@]} page(s) in $((${#dirs[@]} - 1)) folder(s)"
+            echo "📊 **Stats**: ${#all_html_files[@]} page(s)"
             echo -e "\n💡 *Routes auto-updated on page changes.*"
           } > README.new
 
