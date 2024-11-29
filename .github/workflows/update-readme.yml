@@ -70,6 +70,10 @@ jobs:
               # Group files by folder and sort
               declare -A folder_groups
               declare -A index_files
+
+              # Handle root index separately
+              root_index=""
+
               for file in "${sorted_files[@]}"; do
                 clean_path=$(sanitize_path "${file#./}")
                 folder=$(dirname "$clean_path")
@@ -77,7 +81,11 @@ jobs:
                 
                 # Separate index files
                 if [[ "$basename" == "index" ]]; then
-                  index_files["$folder"]="$file"
+                  if [[ "$folder" == "." ]]; then
+                    root_index="$file"
+                  else
+                    index_files["$folder"]="$file"
+                  fi
                 else
                   [[ "$folder" == "." ]] && folder=""
                   folder_groups["$folder"]+="$file "
@@ -88,22 +96,20 @@ jobs:
               mapfile -t sorted_folders < <(printf '%s\n' "${!folder_groups[@]}" | sort)
               
               # Prepend root index if exists
-              if [[ -n "${index_files[.]}" ]]; then
+              if [[ -n "$root_index" ]]; then
                 echo "- [🏠 Homepage]($BASE_URL/)"
               fi
 
               # Process sorted folders and their files
               for folder in "${sorted_folders[@]}"; do
                 # Add index file for folder if exists
-                if [[ -n "${index_files[$folder]}" ]]; then
-                  display_name=$([ "$folder" == "." ] && echo "Homepage" || echo "$folder")
-                  route=$([ "$folder" == "." ] && echo "/" || echo "/$folder")
+                if [[ -n "${index_files[$folder]:-}" ]]; then
+                  display_name="$folder"
+                  route="/$folder"
                   folder_emoji=$(get_folder_emoji "$folder")
                   
-                  # Display folder header for non-root folders
-                  if [[ "$folder" != "." ]]; then
-                    echo -e "\n### ${folder_emoji} ${folder}\n"
-                  fi
+                  # Display folder header
+                  echo -e "\n### ${folder_emoji} ${folder}\n"
                   
                   echo "- [🏠 $display_name]($BASE_URL$route)"
                 fi
