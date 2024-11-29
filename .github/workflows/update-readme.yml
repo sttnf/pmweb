@@ -50,7 +50,7 @@ jobs:
 
           # Find and Sort HTML Files
           mapfile -t sorted_files < <(find . -type f -name "*.html" ! -path "./README.md" | sort)
-
+          
           # Generate Routes Documentation
           {
             # Preserve content before routes section
@@ -69,29 +69,50 @@ jobs:
 
               # Group files by folder and sort
               declare -A folder_groups
+              declare -A index_files
               for file in "${sorted_files[@]}"; do
                 clean_path=$(sanitize_path "${file#./}")
                 folder=$(dirname "$clean_path")
-                [[ "$folder" == "." ]] && folder=""
-                folder_groups["$folder"]+="$file "
+                basename=$(basename "$clean_path")
+                
+                # Separate index files
+                if [[ "$basename" == "index" ]]; then
+                  index_files["$folder"]="$file"
+                else
+                  [[ "$folder" == "." ]] && folder=""
+                  folder_groups["$folder"]+="$file "
+                fi
               done
 
               # Sort folders
               mapfile -t sorted_folders < <(printf '%s\n' "${!folder_groups[@]}" | sort)
+              
+              # Prepend root index if exists
+              if [[ -n "${index_files[.]}" ]]; then
+                echo "- [🏠 Homepage]($BASE_URL/)"
+              fi
 
               # Process sorted folders and their files
               for folder in "${sorted_folders[@]}"; do
+                # Add index file for folder if exists
+                if [[ -n "${index_files[$folder]}" ]]; then
+                  display_name=$([ "$folder" == "." ] && echo "Homepage" || echo "$folder")
+                  route=$([ "$folder" == "." ] && echo "/" || echo "/$folder")
+                  folder_emoji=$(get_folder_emoji "$folder")
+                  
+                  # Display folder header for non-root folders
+                  if [[ "$folder" != "." ]]; then
+                    echo -e "\n### ${folder_emoji} ${folder}\n"
+                  fi
+                  
+                  echo "- [🏠 $display_name]($BASE_URL$route)"
+                fi
+
                 # Prepare files for this folder
                 IFS=' ' read -ra folder_files <<< "${folder_groups[$folder]}"
                 
                 # Skip if no files
                 [[ ${#folder_files[@]} -eq 0 ]] && continue
-
-                # Folder Header
-                if [[ -n "$folder" ]]; then
-                  folder_emoji=$(get_folder_emoji "$folder")
-                  echo -e "\n### ${folder_emoji} ${folder}\n"
-                fi
 
                 # Sort and generate routes for this folder
                 mapfile -t sorted_folder_files < <(printf '%s\n' "${folder_files[@]}" | sort)
@@ -102,15 +123,9 @@ jobs:
                   folder=$(dirname "$clean_path")
                   basename=$(basename "$clean_path")
 
-                  # Route Generation
-                  if [[ "$basename" == "index" ]]; then
-                    route=$([ "$folder" = "." ] && echo "/" || echo "/$folder")
-                    display_name=$([ "$folder" = "." ] && echo "Homepage" || echo "$folder")
-                    echo "- [🏠 $display_name]($BASE_URL$route)"
-                  else
-                    display_name=$(format_display_name "$basename")
-                    echo "- [📄 $display_name]($BASE_URL/$clean_path)"
-                  fi
+                  # Route Generation for non-index files
+                  display_name=$(format_display_name "$basename")
+                  echo "- [📄 $display_name]($BASE_URL/$clean_path)"
                 done
               done
 
