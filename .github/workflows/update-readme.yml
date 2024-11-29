@@ -98,7 +98,7 @@ jobs:
               [[ -n "$dir_index" ]] && index_route="/$dir"
 
               echo -e "\n### ${folder_emoji} ${dir}\n"
-              [[ -n "$index_route" ]] && echo "- [🏠 ${dir} Overview]($BASE_URL$index_route)"
+              [[ -n "$index_route" ]] && echo "- [🏠 ${dir}]($BASE_URL$index_route)"
 
               # Process files in this directory
               if [[ -n "$dir_files" ]]; then
