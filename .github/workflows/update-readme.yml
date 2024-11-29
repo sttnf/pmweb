@@ -22,25 +22,26 @@ jobs:
           set -euo pipefail
 
           # Configuration
-          EMOJI_MAP=(
-            "praktikum:🔬"
-            "pertemuan:📅"
-            "tugas:📋"
-            "docs:📚"
-            "src:💻"
-            "test:🧪"
+          declare -A EMOJI_MAP=(
+            ["praktikum"]="🔬"
+            ["pertemuan"]="📅"
+            ["tugas"]="📋"
+            ["docs"]="📚"
+            ["src"]="💻"
+            ["test"]="🧪"
+            ["default"]="📁"
           )
 
           # Utility Functions
           get_folder_emoji() {
             local path="$1"
-            for mapping in "${EMOJI_MAP[@]}"; do
-              if [[ "$path" == *"${mapping%%:*}"* ]]; then
-                echo "${mapping##*:}"
+            for key in "${!EMOJI_MAP[@]}"; do
+              if [[ "$path" == *"$key"* ]]; then
+                echo "${EMOJI_MAP[$key]}"
                 return
               fi
             done
-            echo "📁"
+            echo "${EMOJI_MAP[default]}"
           }
 
           sanitize_filename() {
@@ -52,13 +53,13 @@ jobs:
           generate_routes() {
             local base_path="$1"
             local depth="${2:-0}"
-            local indent=""
+            local prefix=""
 
             # Create appropriate header based on depth
             for ((i=0; i<depth; i++)); do
-              indent+="#"
+              prefix+="#"
             done
-            indent+=" "
+            prefix+=" "
 
             # Find and process files and directories
             local files=$(find "$base_path" -maxdepth 1 -type f \( -name "index.html" -o -name "*.html" \) | sort)
@@ -70,7 +71,7 @@ jobs:
               local folder_emoji=$(get_folder_emoji "$relative_path")
 
               # Print directory header
-              echo "${indent}${folder_emoji} [${relative_path:-.}]"
+              echo "${prefix}${folder_emoji} [${relative_path:-.}]"
 
               # Process index files first
               for file in $files; do
@@ -117,8 +118,8 @@ jobs:
             total_dirs=$(find . -type d ! -path '*/\.*' | wc -l)
 
             echo "### Project Stats"
-            echo "- Pages: ${total_pages}"
-            echo "- Folders: $((total_dirs - 1))"
+            echo "- **Pages:** ${total_pages}"
+            echo "- **Folders:** $((total_dirs - 1))"
             echo -e "\n*Automatically updated on changes.*"
           } > README.new
 
