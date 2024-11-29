@@ -48,7 +48,7 @@ jobs:
           # Prepare README
           [[ -f README.md ]] || echo "# Project Documentation" > README.md
 
-          # Find HTML files
+          # Find HTML files and exclude hidden paths
           mapfile -t html_files < <(find . -type f -name "*.html" ! -path "./README.md" ! -path '*/\.*' | sort)
           [[ ${#html_files[@]} -eq 0 ]] && exit 0
 
@@ -68,47 +68,42 @@ jobs:
               local indent="${2:-}"
               local depth="${3:-0}"
 
-              # Find files in current directory
-              local index_file=$(find "$base_path" -maxdepth 1 -type f -name "index.html")
+              # Find files, prioritize index.html
+              local index_files=$(find "$base_path" -maxdepth 1 -type f -name "index.html")
               local other_files=$(find "$base_path" -maxdepth 1 -type f -name "*.html" ! -name "index.html")
-              local subdirs=$(find "$base_path" -maxdepth 1 -type d ! -path '*/\.*' | tail -n +2)
+              local subdirs=$(find "$base_path" -maxdepth 1 -type d ! -path '*/\.*' | tail -n +2 | sort)
 
               # Process only if files or subdirectories exist
-              if [[ -n "$index_file$other_files$subdirs" ]]; then
+              if [[ -n "$index_files$other_files$subdirs" ]]; then
                 local folder_emoji=$(get_folder_emoji "$base_path")
                 local relative_path="${base_path#./}"
 
                 # Print directory header with appropriate indentation
-                if [[ "$depth" -eq 0 ]]; then
-                  echo "${indent}### ${folder_emoji} ${relative_path}"
-                elif [[ "$depth" -eq 1 ]]; then
-                  echo "${indent}#### ${folder_emoji} ${relative_path}"
-                else
-                  echo "${indent}##### ${folder_emoji} ${relative_path}"
-                fi
+                case $depth in
+                  0) echo "${indent}### ${folder_emoji} ${relative_path}" ;;
+                  1) echo "${indent}#### ${folder_emoji} ${relative_path}" ;;
+                  *) echo "${indent}##### ${folder_emoji} ${relative_path}" ;;
+                esac
                 echo ""
 
-                # Index page link
-                if [[ -n "$index_file" ]]; then
-                  echo "${indent}- [🏠 Overview]($BASE_URL/${relative_path})"
-                fi
+                # Prioritize and list index files first
+                for index_file in $index_files; do
+                  local clean_path=$(sanitize_path "${index_file#./}")
+                  echo "${indent}- [🏠 Overview]($BASE_URL/$clean_path)"
+                done
 
-                # Other files in directory
-                if [[ -n "$other_files" ]]; then
-                  while IFS= read -r file; do
-                    local clean_path=$(sanitize_path "${file#./}")
-                    local basename=$(basename "$clean_path" .html)
-                    local display_name=$(format_display_name "$basename")
-                    echo "${indent}- [📄 $display_name]($BASE_URL/$clean_path)"
-                  done <<< "$other_files"
-                fi
+                # List other files, sorted and formatted
+                for file in $other_files; do
+                  local clean_path=$(sanitize_path "${file#./}")
+                  local basename=$(basename "$clean_path" .html)
+                  local display_name=$(format_display_name "$basename")
+                  echo "${indent}- [📄 $display_name]($BASE_URL/$clean_path)"
+                done
 
                 # Recursively process subdirectories
-                if [[ -n "$subdirs" ]]; then
-                  while IFS= read -r subdir; do
-                    process_directory "$subdir" "$indent  " $((depth + 1))
-                  done <<< "$subdirs"
-                fi
+                for subdir in $subdirs; do
+                  process_directory "$subdir" "$indent  " $((depth + 1))
+                done
               fi
             }
 
