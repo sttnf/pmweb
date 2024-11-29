@@ -21,78 +21,79 @@ jobs:
           #!/bin/bash
           set -euo pipefail
 
-          # Utility functions
+          # Utility Functions
           sanitize_path() { 
-            echo "$1" | tr ' ' '-' | sed -E 's/\.html$//'
+            echo "$1" | tr ' ' '-' | sed -E 's/\.html$//' 
           }
 
           get_folder_emoji() {
             local path="$1"
             case "$path" in
+              *praktikum*) echo "🔬" ;;
+              *pertemuan*) echo "📅" ;;
+              *tugas*) echo "📋" ;;
               *docs*) echo "📚" ;;
               *src*) echo "💻" ;;
               *test*) echo "🧪" ;;
-              *build*) echo "🏗️" ;;
-              *script*) echo "🔧" ;;
-              *config*) echo "⚙️" ;;
               *) echo "📁" ;;
             esac
           }
 
           format_display_name() { 
-            echo "$1" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1'
+            echo "$1" | 
+              sed 's/-/ /g' | 
+              awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1'
           }
 
-          # Create README if not exists
+          # Prepare README
           [[ -f README.md ]] || echo "# Project Documentation" > README.md
 
-          # Find all HTML files, excluding README and hidden paths
-          mapfile -t all_html_files < <(find . -type f -name "*.html" ! -path "./README.md" ! -path '*/\.*' | sort)
-
-          # Exit if no files found
-          [[ ${#all_html_files[@]} -eq 0 ]] && exit 0
+          # Find HTML files
+          mapfile -t html_files < <(find . -type f -name "*.html" ! -path "./README.md" ! -path '*/\.*' | sort)
+          [[ ${#html_files[@]} -eq 0 ]] && exit 0
 
           {
-            # Preserve content before routes section
+            # Preserve existing content before routes section
             sed '/## 📄 Available Routes/,$d' README.md
 
             # Routes section header
             echo -e "\n## 📄 Available Routes\n"
             echo -e "*Last updated: $(date "+%Y-%m-%d %H:%M UTC")*\n"
 
-            echo -e "<details>\n<summary>Click to expand routes and folders</summary>\n"
+            echo -e "<details open>\n<summary>🗂️ Project Structure</summary>\n"
 
-            # Declare a function to process directories recursively
+            # Recursive directory processing function
             process_directory() {
               local base_path="$1"
               local indent="${2:-}"
               local depth="${3:-0}"
 
-              # Find index and other files in this directory
+              # Find files in current directory
               local index_file=$(find "$base_path" -maxdepth 1 -type f -name "index.html")
               local other_files=$(find "$base_path" -maxdepth 1 -type f -name "*.html" ! -name "index.html")
               local subdirs=$(find "$base_path" -maxdepth 1 -type d ! -path '*/\.*' | tail -n +2)
 
-              # Only process if there are files or subdirectories
+              # Process only if files or subdirectories exist
               if [[ -n "$index_file$other_files$subdirs" ]]; then
-                # Get folder emoji
                 local folder_emoji=$(get_folder_emoji "$base_path")
                 local relative_path="${base_path#./}"
 
-                # Print directory header
-                if [[ "$depth" -gt 0 ]]; then
+                # Print directory header with appropriate indentation
+                if [[ "$depth" -eq 0 ]]; then
+                  echo "${indent}### ${folder_emoji} ${relative_path}"
+                elif [[ "$depth" -eq 1 ]]; then
                   echo "${indent}#### ${folder_emoji} ${relative_path}"
                 else
-                  echo "${indent}### ${folder_emoji} ${relative_path}"
+                  echo "${indent}##### ${folder_emoji} ${relative_path}"
                 fi
                 echo ""
 
-                # Print index route if exists
+                # Index page link
                 if [[ -n "$index_file" ]]; then
-                  echo "${indent}- [🏠 ${relative_path##*/}]($BASE_URL/${relative_path})"
+                  echo "${indent}- [🏠 Overview]($BASE_URL/${relative_path})"
                 fi
 
-                # Process other files in this directory
+                # Other files in directory
                 if [[ -n "$other_files" ]]; then
                   while IFS= read -r file; do
                     local clean_path=$(sanitize_path "${file#./}")
@@ -115,8 +116,13 @@ jobs:
             process_directory "."
 
             echo -e "\n</details>\n---\n"
-            echo "📊 **Stats**: ${#all_html_files[@]} page(s)"
-            echo -e "\n💡 *Routes auto-updated on page changes.*"
+            
+            # Project statistics
+            total_dirs=$(find . -type d ! -path '*/\.*' | wc -l)
+            echo "📊 **Project Stats**:"
+            echo "- 📄 Pages: ${#html_files[@]}"
+            echo "- 📂 Folders: $((total_dirs - 1))"
+            echo -e "\n💡 *Automatically updated on page changes.*"
           } > README.new
 
           # Update README only if changes exist
