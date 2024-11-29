@@ -1,4 +1,4 @@
-name: Update Project Documentation
+name: Update Routes Documentation
 
 on:
   push:
@@ -9,118 +9,120 @@ permissions:
   contents: write
 
 jobs:
-  update-documentation:
+  update-readme:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate Project Routes
+      - name: Generate Routes Documentation
         env:
           BASE_URL: "https://nf.kita.blue"
         run: |
           #!/bin/bash
           set -euo pipefail
 
-          # Configuration
-          declare -A EMOJI_MAP=(
-            ["praktikum"]="🔬"
-            ["pertemuan"]="📅"
-            ["tugas"]="📋"
-            ["docs"]="📚"
-            ["src"]="💻"
-            ["test"]="🧪"
-            ["default"]="📁"
-          )
-
           # Utility Functions
+          sanitize_path() { 
+            echo "$1" | tr ' ' '-' | sed -E 's/\.html$//' 
+          }
+
           get_folder_emoji() {
             local path="$1"
-            for key in "${!EMOJI_MAP[@]}"; do
-              if [[ "$path" == *"$key"* ]]; then
-                echo "${EMOJI_MAP[$key]}"
-                return
-              fi
-            done
-            echo "${EMOJI_MAP[default]}"
+            case "$path" in
+              *praktikum*) echo "🔬" ;;
+              *pertemuan*) echo "📅" ;;
+              *tugas*) echo "📋" ;;
+              *docs*) echo "📚" ;;
+              *src*) echo "💻" ;;
+              *test*) echo "🧪" ;;
+              *) echo "📁" ;;
+            esac
           }
 
-          sanitize_filename() {
-            basename "$1" .html | 
-              tr '-' ' ' | 
+          format_display_name() { 
+            echo "$1" | 
+              sed 's/-/ /g' | 
               awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1'
-          }
-
-          generate_routes() {
-            local base_path="$1"
-            local depth="${2:-0}"
-            local prefix=""
-
-            # Create appropriate header based on depth
-            for ((i=0; i<depth; i++)); do
-              prefix+="#"
-            done
-            prefix+=" "
-
-            # Find and process files and directories
-            local files=$(find "$base_path" -maxdepth 1 -type f \( -name "index.html" -o -name "*.html" \) | sort)
-            local dirs=$(find "$base_path" -maxdepth 1 -type d ! -path '*/\.*' | tail -n +2 | sort)
-
-            # Only process if files or directories exist
-            if [[ -n "$files$dirs" ]]; then
-              local relative_path="${base_path#./}"
-              local folder_emoji=$(get_folder_emoji "$relative_path")
-
-              # Print directory header
-              echo "${prefix}${folder_emoji} [${relative_path:-.}]"
-
-              # Process index files first
-              for file in $files; do
-                if [[ "$(basename "$file")" == "index.html" ]]; then
-                  local clean_path=$(sed 's|^\./||; s|index\.html$||' <<< "$file")
-                  echo "- [Overview]($BASE_URL/${clean_path}) 🏠"
-                fi
-              done
-
-              # Process other HTML files
-              for file in $files; do
-                if [[ "$(basename "$file")" != "index.html" ]]; then
-                  local clean_path=$(sed 's|^\./||; s|\.html$||' <<< "$file")
-                  local display_name=$(sanitize_filename "$file")
-                  echo "- [${display_name}]($BASE_URL/${clean_path}) 📄"
-                fi
-              done
-
-              # Recursively process subdirectories
-              for dir in $dirs; do
-                generate_routes "$dir" $((depth + 1))
-              done
-            fi
           }
 
           # Prepare README
           [[ -f README.md ]] || echo "# Project Documentation" > README.md
 
-          # Generate documentation
+          # Find HTML files
+          mapfile -t html_files < <(find . -type f -name "*.html" ! -path "./README.md" ! -path '*/\.*' | sort)
+          [[ ${#html_files[@]} -eq 0 ]] && exit 0
+
           {
             # Preserve existing content before routes section
-            sed '/## Project Routes/,$d' README.md
+            sed '/## 📄 Available Routes/,$d' README.md
 
-            echo -e "\n## Project Routes\n"
-            echo "*Last updated: $(date "+%Y-%m-%d %H:%M UTC")*\n"
+            # Routes section header
+            echo -e "\n## 📄 Available Routes\n"
+            echo -e "*Last updated: $(date "+%Y-%m-%d %H:%M UTC")*\n"
 
-            # Start route generation
-            generate_routes "."
+            echo -e "<details open>\n<summary>🗂️ Project Structure</summary>\n"
 
-            echo -e "\n---\n"
+            # Recursive directory processing function
+            process_directory() {
+              local base_path="$1"
+              local indent="${2:-}"
+              local depth="${3:-0}"
+
+              # Find files in current directory
+              local index_file=$(find "$base_path" -maxdepth 1 -type f -name "index.html")
+              local other_files=$(find "$base_path" -maxdepth 1 -type f -name "*.html" ! -name "index.html")
+              local subdirs=$(find "$base_path" -maxdepth 1 -type d ! -path '*/\.*' | tail -n +2)
+
+              # Process only if files or subdirectories exist
+              if [[ -n "$index_file$other_files$subdirs" ]]; then
+                local folder_emoji=$(get_folder_emoji "$base_path")
+                local relative_path="${base_path#./}"
+
+                # Print directory header with appropriate indentation
+                if [[ "$depth" -eq 0 ]]; then
+                  echo "${indent}### ${folder_emoji} ${relative_path}"
+                elif [[ "$depth" -eq 1 ]]; then
+                  echo "${indent}#### ${folder_emoji} ${relative_path}"
+                else
+                  echo "${indent}##### ${folder_emoji} ${relative_path}"
+                fi
+                echo ""
+
+                # Index page link
+                if [[ -n "$index_file" ]]; then
+                  echo "${indent}- [🏠 Overview]($BASE_URL/${relative_path})"
+                fi
+
+                # Other files in directory
+                if [[ -n "$other_files" ]]; then
+                  while IFS= read -r file; do
+                    local clean_path=$(sanitize_path "${file#./}")
+                    local basename=$(basename "$clean_path" .html)
+                    local display_name=$(format_display_name "$basename")
+                    echo "${indent}- [📄 $display_name]($BASE_URL/$clean_path)"
+                  done <<< "$other_files"
+                fi
+
+                # Recursively process subdirectories
+                if [[ -n "$subdirs" ]]; then
+                  while IFS= read -r subdir; do
+                    process_directory "$subdir" "$indent  " $((depth + 1))
+                  done <<< "$subdirs"
+                fi
+              fi
+            }
+
+            # Start processing from root
+            process_directory "."
+
+            echo -e "\n</details>\n---\n"
             
             # Project statistics
-            total_pages=$(find . -type f -name "*.html" ! -path "./README.md" ! -path '*/\.*' | wc -l)
             total_dirs=$(find . -type d ! -path '*/\.*' | wc -l)
-
-            echo "### Project Stats"
-            echo "- **Pages:** ${total_pages}"
-            echo "- **Folders:** $((total_dirs - 1))"
-            echo -e "\n*Automatically updated on changes.*"
+            echo "📊 **Project Stats**:"
+            echo "- 📄 Pages: ${#html_files[@]}"
+            echo "- 📂 Folders: $((total_dirs - 1))"
+            echo -e "\n💡 *Automatically updated on page changes.*"
           } > README.new
 
           # Update README only if changes exist
@@ -132,13 +134,13 @@ jobs:
             echo "should_commit=false" >> "$GITHUB_ENV"
           fi
 
-      - name: Commit Documentation
+      - name: Commit Changes
         if: env.should_commit == 'true'
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add README.md
-          git commit -m "📝 Update project routes [skip ci]"
+          git commit -m "📝 Update routes documentation [skip ci]"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
