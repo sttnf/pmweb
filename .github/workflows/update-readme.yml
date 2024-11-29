@@ -21,14 +21,10 @@ jobs:
           #!/bin/bash
           set -euo pipefail
 
-          # Utility Functions
-          sanitize_path() {
-            echo "$1" | tr ' ' '-' | sed -E 's/\.html$//'
-          }
-
+          # Simplified utility functions
+          sanitize_path() { echo "$1" | tr ' ' '-' | sed -E 's/\.html$//' ; }
           get_folder_emoji() {
-            local folder="$1"
-            case "$folder" in
+            case "$1" in
               *blog*) echo "📝" ;;
               *docs*) echo "📚" ;;
               *pages*) echo "📃" ;;
@@ -36,134 +32,87 @@ jobs:
               *) echo "📁" ;;
             esac
           }
-
-          format_display_name() {
+          format_display_name() { 
             echo "$1" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1'
           }
 
-          # Prepare README Template
-          [[ -f README.md ]] || cat > README.md << 'EOL'
-          # Project Documentation
+          # Create README if not exists
+          [[ -f README.md ]] || echo "# Project Documentation" > README.md
 
-          Welcome to our project pages.
-          EOL
-
-          # Find all directories and HTML files
-          mapfile -t all_dirs < <(find . -type d | sed 's|^\./||' | sort)
+          # Find HTML files and non-hidden directories
           mapfile -t html_files < <(find . -type f -name "*.html" ! -path "./README.md" | sort)
-          
-          # Generate Routes Documentation
+          mapfile -t dirs < <(find . -type d ! -path '*/\.*' | sed 's|^\./||' | sort)
+
+          # Exit if no files or directories
+          [[ ${#html_files[@]} -eq 0 && ${#dirs[@]} -eq 0 ]] && exit 0
+
+          # Generate routes documentation
           {
             # Preserve content before routes section
             sed '/## 📄 Available Routes/,$d' README.md
 
-            # Routes Section Header
+            # Routes section header
             echo -e "\n## 📄 Available Routes\n"
             echo -e "*Last updated: $(date "+%Y-%m-%d %H:%M UTC")*\n"
 
-            # Check if any files or folders exist
-            if [[ ${#all_dirs[@]} -eq 0 && ${#html_files[@]} -eq 0 ]]; then
-              echo "🚧 No pages or folders available yet."
-            else
-              echo -e "<details>\n<summary>Click to expand routes and folders</summary>\n"
-              echo -e "Browse through our project structure:\n"
+            echo -e "<details>\n<summary>Click to expand routes and folders</summary>\n"
 
-              # Group HTML files by folder
-              declare -A folder_files
-              declare -A index_files
+            # Group HTML files by directory
+            declare -A folder_files
+            declare -A index_files
 
-              for file in "${html_files[@]}"; do
+            for file in "${html_files[@]}"; do
+              clean_path=$(sanitize_path "${file#./}")
+              folder=$(dirname "$clean_path")
+              basename=$(basename "$clean_path")
+              
+              [[ "$basename" == "index" ]] && index_files["$folder"]="$file"
+              [[ "$folder" == "." ]] && folder=""
+              folder_files["$folder"]+="$file "
+            done
+
+            # Process directories
+            for dir in "${dirs[@]}"; do
+              [[ "$dir" == "." ]] && continue
+
+              # Skip empty directories
+              [[ -z "${folder_files[$dir]}" && -z "${index_files[$dir]}" ]] && continue
+
+              folder_emoji=$(get_folder_emoji "$dir")
+              index_route=${index_files[$dir]:+/$dir}
+
+              echo -e "\n### ${folder_emoji} ${dir}\n"
+              [[ -n "$index_route" ]] && echo "- [🏠 ${dir} Overview]($BASE_URL$index_route)"
+
+              for file in ${folder_files[$dir]}; do
                 clean_path=$(sanitize_path "${file#./}")
-                folder=$(dirname "$clean_path")
                 basename=$(basename "$clean_path")
-                
-                # Track index files
-                if [[ "$basename" == "index" ]]; then
-                  index_files["$folder"]="$file"
-                fi
-                
-                # Group files by folder
-                [[ "$folder" == "." ]] && folder=""
-                folder_files["$folder"]+="$file "
+                [[ "$basename" == "index" ]] && continue
+
+                display_name=$(format_display_name "$basename")
+                echo "- [📄 $display_name]($BASE_URL/$clean_path)"
               done
+            done
 
-              # Process all directories
-              for dir in "${all_dirs[@]}"; do
-                # Skip current directory and any hidden folders
-                [[ "$dir" == "." || "$dir" =~ ^\. ]] && continue
+            # Handle root directory
+            root_files="${folder_files[.]:-}"
+            if [[ -n "${index_files[.]:-}" || -n "$root_files" ]]; then
+              echo -e "\n### 🏠 Root\n"
+              [[ -n "${index_files[.]:-}" ]] && echo "- [🏠 Homepage]($BASE_URL/)"
 
-                # Determine folder emoji
-                folder_emoji=$(get_folder_emoji "$dir")
-                
-                # Check if folder has an index file
-                index_route=""
-                if [[ -n "${index_files[$dir]:-}" ]]; then
-                  index_route="/$dir"
-                fi
+              for file in $root_files; do
+                clean_path=$(sanitize_path "${file#./}")
+                basename=$(basename "$clean_path")
+                [[ "$basename" == "index" ]] && continue
 
-                # Display folder header
-                echo -e "\n### ${folder_emoji} ${dir}\n"
-                
-                # Display index route if exists
-                if [[ -n "$index_route" ]]; then
-                  echo "- [🏠 ${dir} Overview]($BASE_URL$index_route)"
-                fi
-
-                # Process HTML files in this folder
-                if [[ -n "${folder_files[$dir]:-}" ]]; then
-                  IFS=' ' read -ra dir_files <<< "${folder_files[$dir]}"
-                  mapfile -t sorted_dir_files < <(printf '%s\n' "${dir_files[@]}" | sort)
-                  
-                  for file in "${sorted_dir_files[@]}"; do
-                    # Skip index file (already displayed)
-                    clean_path=$(sanitize_path "${file#./}")
-                    basename=$(basename "$clean_path")
-                    [[ "$basename" == "index" ]] && continue
-
-                    # Generate route for other files
-                    display_name=$(format_display_name "$basename")
-                    echo "- [📄 $display_name]($BASE_URL/$clean_path)"
-                  done
-                fi
+                display_name=$(format_display_name "$basename")
+                echo "- [📄 $display_name]($BASE_URL/$clean_path)"
               done
-
-              # Handle root directory separately
-              root_files="${folder_files[.]:-}"
-              if [[ -n "${index_files[.]:-}" || -n "$root_files" ]]; then
-                echo -e "\n### 🏠 Root\n"
-                
-                # Display root index if exists
-                if [[ -n "${index_files[.]:-}" ]]; then
-                  echo "- [🏠 Homepage]($BASE_URL/)"
-                fi
-
-                # Process root HTML files
-                if [[ -n "$root_files" ]]; then
-                  IFS=' ' read -ra root_file_list <<< "$root_files"
-                  mapfile -t sorted_root_files < <(printf '%s\n' "${root_file_list[@]}" | sort)
-                  
-                  for file in "${sorted_root_files[@]}"; do
-                    # Skip root index file
-                    clean_path=$(sanitize_path "${file#./}")
-                    basename=$(basename "$clean_path")
-                    [[ "$basename" == "index" ]] && continue
-
-                    # Generate route for root files
-                    display_name=$(format_display_name "$basename")
-                    echo "- [📄 $display_name]($BASE_URL/$clean_path)"
-                  done
-                fi
-              fi
-
-              echo -e "\n</details>"
-
-              # Stats Footer
-              echo -e "\n---\n"
-              folder_count=$((${#all_dirs[@]} - 1))  # Subtract 1 to exclude root
-              file_count=${#html_files[@]}
-              echo "📊 **Stats**: $file_count page(s) in $folder_count folder(s)"
-              echo -e "\n💡 *Routes auto-updated on page changes.*"
             fi
+
+            echo -e "\n</details>\n---\n"
+            echo "📊 **Stats**: ${#html_files[@]} page(s) in $((${#dirs[@]} - 1)) folder(s)"
+            echo -e "\n💡 *Routes auto-updated on page changes.*"
           } > README.new
 
           # Update README only if changes exist
