@@ -17,8 +17,13 @@ jobs:
 
       - name: Update README with Routes
         env:
-          BASE_URL: "https://sttnf.github.io/pmweb"
+          BASE_URL: "https://nf.kita.blue"
         run: |
+          # Function to convert folder/filename to URL-friendly format
+          sanitize_path() {
+            echo "$1" | tr ' ' '-' | sed 's/\.html$//'
+          }
+
           # Initialize or read README
           if [ ! -f README.md ]; then
             cat > README.md << 'EOL'
@@ -28,10 +33,9 @@ jobs:
           EOL
           fi
 
-          # Check if any HTML files exist
+          # Find HTML files, excluding README.md
           files=$(find . -type f -name "*.html" ! -path "./README.md" | sort)
 
-          # Generate new routes content
           {
             # Preserve existing content before routes section
             if grep -q "## 📄 Available Routes" README.md; then
@@ -55,8 +59,7 @@ jobs:
               # Process all HTML files
               while IFS= read -r file; do
                 # Clean up path
-                path=${file#./}
-                path=${path%.html}
+                path=$(sanitize_path "${file#./}")
                 folder=$(dirname "$path")
                 basename=$(basename "$path")
 
@@ -85,13 +88,13 @@ jobs:
                     if [[ "$folder" == "." ]]; then
                       echo "- [🏠 Homepage]($BASE_URL/)"
                     else
-                      echo "- [📍 ${folder}]($BASE_URL/$path)"
+                      echo "- [📍 ${folder}]($BASE_URL/${folder})"
                     fi
                   else
                     # Handle regular files
                     # Capitalize first letter and replace hyphens with spaces
                     display_name=$(echo "$basename" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
-                    echo "- [📄 ${display_name}]($BASE_URL/$folder/$basename)"
+                    echo "- [📄 ${display_name}]($BASE_URL/$path)"
                   fi
                 fi
               done <<< "$files"
