@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Authentication</title>
+  </head>
+  <body>
+    <h2>Login</h2>
+
+    <form id="loginForm" onsubmit="login()">
+      <label for="username"> Username: </label>
+      <input type="text" id="username" name="username" required />
+      <br />
+
+      <label for="password"> Password: </label>
+      <input type="password" id="password" name="password" required />
+      <br />
+
+      <button type="submit">Login</button>
+      <button type="reset">Reset</button>
+    </form>
+
+    <script>
+      function login() {
+        event.preventDefault();
+
+        const form = document.getElementById("loginForm");
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (username === "admin" && password === "admin") {
+          alert("Login Berhasil");
+          window.location.href = "https://rafaar.kita.blue";
+        } else {
+          alert("Login Gagal");
+        }
+
+        form.reset();
+      }
+    </script>
+  </body>
+</html>
