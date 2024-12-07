@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator</title>
+    <script>
+      function hitung() {
+        const bil1 = document.getElementById("bil1").value;
+        const bil2 = document.getElementById("bil2").value;
+        const operator = document.querySelector(
+          'input[name="operator"]:checked'
+        ).value;
+        let hasil = 0;
+        if (operator === "tambah") {
+          hasil = parseInt(bil1) + parseInt(bil2);
+        } else if (operator === "kurang") {
+          hasil = parseInt(bil1) - parseInt(bil2);
+        } else if (operator === "kali") {
+          hasil = parseInt(bil1) * parseInt(bil2);
+        } else if (operator === "bagi") {
+          hasil = parseInt(bil1) / parseInt(bil2);
+        }
+
+        document.getElementById("hasil").innerHTML = hasil;
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Kalkulator</h1>
+    <form onsubmit="event.preventDefault(); hitung();">
+      <label for="bil1">Angka Pertama</label>
+      <input
+        type="number"
+        id="bil1"
+        name="bil1"
+        placeholder="Angka pertama"
+        required
+      />
+      <br />
+      <label for="bil2">Angka Kedua</label>
+      <input
+        type="number"
+        id="bil2"
+        name="bil2"
+        placeholder="Angka kedua"
+        required
+      />
+      <br />
+      <label for="operator">Pilih Operator</label>
+      <input type="radio" name="operator" value="tambah" required />+
+      <input type="radio" name="operator" value="kurang" />-
+      <input type="radio" name="operator" value="kali" />x
+      <input type="radio" name="operator" value="bagi" />/
+      <br />
+      <button type="submit">Hitung</button>
+      <br />
+
+      <div>Hasil:<span id="hasil"></span></div>
+    </form>
+  </body>
+</html>
