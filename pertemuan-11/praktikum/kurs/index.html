@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kurs</title>
+
+    <script>
+      function hitungKurs() {
+        const jumlah = document.getElementById("jumlah").value;
+        const kurs = document.getElementById("kurs").value;
+        const hasil = document.getElementById("hasil");
+
+        hasil.innerHTML = parseFloat(jumlah * kurs).toFixed(2);
+      }
+    </script>
+  </head>
+  <body>
+    <marquee onmouseover="this.stop()" onmouseout="this.start()">
+      <h1>Konversi Kurs Mata Uang</h1>
+    </marquee>
+
+    <div style="padding: 10px; background: yellow; border: 1px dotted red">
+      <form>
+        <input
+          type="number"
+          id="jumlah"
+          name="jumlah"
+          placeholder="Jumlah"
+          required
+        />
+        <select id="kurs" name="kurs" required onchange="hitungKurs()">
+          <option value="">Pilih</option>
+          <option value="15800">USD</option>
+          <option value="18000">Euro</option>
+          <option value="2150">Yuan</option>
+          <option value="3000">Ringgit</option>
+          <option value="10000">Dolar Singapura</option>
+          <option value="4000">Riyal</option>
+        </select>
+        <div>Hasil IDR:<span id="hasil"></span></div>
+      </form>
+    </div>
+  </body>
+</html>
