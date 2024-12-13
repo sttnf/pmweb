@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Validasi Pemesanan Tiket</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 400px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+      }
+      .input-error {
+        border-color: red;
+      }
+      .error-text {
+        color: red;
+        font-size: 0.8em;
+        margin-top: 5px;
+      }
+      #result {
+        background-color: #e9f5e9;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="bookingForm">
+      <div class="form-group">
+        <input
+          type="text"
+          name="nama"
+          placeholder="Nama Pelanggan"
+          maxlength="30"
+          required
+        />
+        <div class="error-text"></div>
+      </div>
+
+      <div class="form-group">
+        <input type="email" name="email" placeholder="Email" required />
+        <div class="error-text"></div>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="text"
+          name="jamKeberangkatan"
+          placeholder="Jam Keberangkatan (HH.MM)"
+          required
+        />
+        <div class="error-text"></div>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="text"
+          name="tujuan"
+          placeholder="Tujuan Keberangkatan"
+          required
+        />
+        <div class="error-text"></div>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="number"
+          name="jumlahTiket"
+          placeholder="Jumlah Tiket (1-10)"
+          min="1"
+          max="10"
+          required
+        />
+        <div class="error-text"></div>
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+      document
+        .getElementById("bookingForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const validations = {
+            nama: {
+              validate: (value) =>
+                value.trim().length > 0 && value.length <= 30,
+              errorMessage: "Nama harus diisi (maks 30 karakter)",
+            },
+            email: {
+              validate: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+              errorMessage: "Email tidak valid",
+            },
+            jamKeberangkatan: {
+              validate: (value) => /^([01]\d|2[0-3])\.([0-5]\d)$/.test(value),
+              errorMessage: "Format jam tidak valid (HH.MM)",
+            },
+            tujuan: {
+              validate: (value) => value.trim().length > 0,
+              errorMessage: "Tujuan harus diisi",
+            },
+            jumlahTiket: {
+              validate: (value) => value >= 1 && value <= 10,
+              errorMessage: "Jumlah tiket harus antara 1-10",
+            },
+          };
+
+          this.querySelectorAll(".input-error").forEach((el) =>
+            el.classList.remove("input-error")
+          );
+          this.querySelectorAll(".error-text").forEach(
+            (el) => (el.textContent = "")
+          );
+
+          let isValid = true;
+
+          Object.keys(validations).forEach((fieldName) => {
+            const input = this.querySelector(`[name="${fieldName}"]`);
+            const errorElement = input.nextElementSibling;
+            const { validate, errorMessage } = validations[fieldName];
+
+            if (!validate(input.value)) {
+              input.classList.add("input-error");
+              errorElement.textContent = errorMessage;
+              isValid = false;
+            }
+          });
+
+          if (isValid) {
+            const resultContent = Object.keys(validations)
+              .map((fieldName) => {
+                const input = this.querySelector(`[name="${fieldName}"]`);
+                return `<p><strong>${
+                  fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
+                }:</strong> ${input.value}</p>`;
+              })
+              .join("");
+
+            document.getElementById("result").innerHTML = `
+                <h3>Detail Pemesanan</h3>
+                ${resultContent}
+            `;
+          }
+        });
+    </script>
+  </body>
+</html>
