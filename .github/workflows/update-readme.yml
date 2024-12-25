@@ -53,7 +53,7 @@ jobs:
           EOL
 
           # Find HTML Files
-          mapfile -t files < <(find . -type f -name "*.html" ! -path "./README.md" | sort)
+          mapfile -t files < <(find . -type f -name "*.html" ! -path "./README.md" | sort -V)
 
           # Generate Routes Section
           {
@@ -80,14 +80,14 @@ jobs:
               done
 
               # Sort folders
-              for folder in $(printf "%s\n" "${!folder_groups[@]}" | sort); do
+              for folder in $(printf "%s\n" "${!folder_groups[@]}" | sort -V); do
                 folder_emoji=$(get_folder_emoji "$folder")
                 echo -e "### ${folder_emoji} ${folder}"
                 echo
 
                 # Sort files in folder
                 IFS=' ' read -ra folder_files <<< "${folder_groups[$folder]}"
-                for file in $(printf "%s\n" "${folder_files[@]}" | sort); do
+                for file in $(printf "%s\n" "${folder_files[@]}" | sort -V); do
                   clean_path=$(sanitize_path "${file#./}")
                   basename=$(basename "$clean_path")
                   folder_name=$(dirname "$clean_path")
