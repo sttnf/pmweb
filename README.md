@@ -3,7 +3,7 @@
 Welcome to our project documentation.
 
 ## 📄 Available Routes
-*Last updated: 2024-12-13 11:30 UTC*
+*Last updated: 2024-12-14 03:58 UTC*
 
 <details>
 <summary>Click to expand routes</summary>
@@ -31,6 +31,11 @@ Welcome to our project documentation.
 ### 📁 pertemuan-11/praktikum/pergantian-gambar
 
 - [🏠 Pertemuan 11/praktikum/pergantian Gambar](https://nf.kita.blue/pertemuan-11/praktikum/pergantian-gambar)
+
+### 📁 pertemuan-12
+
+- [📄 Form](https://nf.kita.blue/pertemuan-12/form)
+- [🏠 Pertemuan 12](https://nf.kita.blue/pertemuan-12)
 
 ### 📁 pertemuan-2/cv
 
@@ -126,5 +131,5 @@ Welcome to our project documentation.
 
 ---
 
-📊 **Stats**: 33 page(s) in 27 folder(s)
+📊 **Stats**: 35 page(s) in 28 folder(s)
 💡 *Routes auto-updated on page changes.*
