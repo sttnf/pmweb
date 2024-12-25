@@ -3,47 +3,10 @@
 Welcome to our project documentation.
 
 ## 📄 Available Routes
-*Last updated: 2024-12-25 07:09 UTC*
+*Last updated: 2024-12-25 07:14 UTC*
 
 <details>
 <summary>Click to expand routes</summary>
-
-### 📁 pertemuan-10/praktikum/chat
-
-- [🏠 Pertemuan 10/praktikum/chat](https://nf.kita.blue/pertemuan-10/praktikum/chat)
-
-### 📁 pertemuan-10/praktikum/login
-
-- [🏠 Pertemuan 10/praktikum/login](https://nf.kita.blue/pertemuan-10/praktikum/login)
-
-### 📁 pertemuan-11/praktikum/form-validation
-
-- [🏠 Pertemuan 11/praktikum/form Validation](https://nf.kita.blue/pertemuan-11/praktikum/form-validation)
-
-### 📁 pertemuan-11/praktikum/kalkulator
-
-- [🏠 Pertemuan 11/praktikum/kalkulator](https://nf.kita.blue/pertemuan-11/praktikum/kalkulator)
-
-### 📁 pertemuan-11/praktikum/kurs
-
-- [🏠 Pertemuan 11/praktikum/kurs](https://nf.kita.blue/pertemuan-11/praktikum/kurs)
-
-### 📁 pertemuan-11/praktikum/pergantian-gambar
-
-- [🏠 Pertemuan 11/praktikum/pergantian Gambar](https://nf.kita.blue/pertemuan-11/praktikum/pergantian-gambar)
-
-### 📁 pertemuan-12
-
-- [📄 Form](https://nf.kita.blue/pertemuan-12/form)
-- [🏠 Pertemuan 12](https://nf.kita.blue/pertemuan-12)
-
-### 📁 pertemuan-12/praktikum-mandiri
-
-- [🏠 Pertemuan 12/praktikum Mandiri](https://nf.kita.blue/pertemuan-12/praktikum-mandiri)
-
-### 📁 pertemuan-13/praktikum
-
-- [📄 Admin Lte](https://nf.kita.blue/pertemuan-13/praktikum/admin-lte)
 
 ### 📁 pertemuan-2/cv
 
@@ -134,6 +97,43 @@ Welcome to our project documentation.
 ### 📁 pertemuan-9/praktikum/p-4
 
 - [🏠 Pertemuan 9/praktikum/p 4](https://nf.kita.blue/pertemuan-9/praktikum/p-4)
+
+### 📁 pertemuan-10/praktikum/chat
+
+- [🏠 Pertemuan 10/praktikum/chat](https://nf.kita.blue/pertemuan-10/praktikum/chat)
+
+### 📁 pertemuan-10/praktikum/login
+
+- [🏠 Pertemuan 10/praktikum/login](https://nf.kita.blue/pertemuan-10/praktikum/login)
+
+### 📁 pertemuan-11/praktikum/form-validation
+
+- [🏠 Pertemuan 11/praktikum/form Validation](https://nf.kita.blue/pertemuan-11/praktikum/form-validation)
+
+### 📁 pertemuan-11/praktikum/kalkulator
+
+- [🏠 Pertemuan 11/praktikum/kalkulator](https://nf.kita.blue/pertemuan-11/praktikum/kalkulator)
+
+### 📁 pertemuan-11/praktikum/kurs
+
+- [🏠 Pertemuan 11/praktikum/kurs](https://nf.kita.blue/pertemuan-11/praktikum/kurs)
+
+### 📁 pertemuan-11/praktikum/pergantian-gambar
+
+- [🏠 Pertemuan 11/praktikum/pergantian Gambar](https://nf.kita.blue/pertemuan-11/praktikum/pergantian-gambar)
+
+### 📁 pertemuan-12
+
+- [📄 Form](https://nf.kita.blue/pertemuan-12/form)
+- [🏠 Pertemuan 12](https://nf.kita.blue/pertemuan-12)
+
+### 📁 pertemuan-12/praktikum-mandiri
+
+- [🏠 Pertemuan 12/praktikum Mandiri](https://nf.kita.blue/pertemuan-12/praktikum-mandiri)
+
+### 📁 pertemuan-13/praktikum
+
+- [📄 Admin Lte](https://nf.kita.blue/pertemuan-13/praktikum/admin-lte)
 
 </details>
 
